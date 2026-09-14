@@ -1,6 +1,10 @@
 # Tutti: presentation kit
 
-Slide-by-slide copy for the Adobe Express template, plus a demo video script. Screenshots are in `docs/screenshots/`.
+Slide-by-slide copy for the Adobe Express template, plus a demo video script.
+
+- **Finished slides:** `docs/deck/slides/01.png` to `12.png` (1920×1080). Import them into Adobe Express as full-bleed images, or rebuild the copy on the template. To regenerate after editing `docs/deck/deck.html`, run `bash docs/deck/render.sh`.
+- **Screenshots:** `docs/screenshots/` (full-resolution phone captures, plus `hero.png` with four screens side by side)
+- **Demo video:** `docs/demo/tutti-demo.mp4` (2.5 minutes, screen plus the app's own audio, rehearsal mode at 20×)
 
 ---
 
@@ -9,7 +13,7 @@ Slide-by-slide copy for the Adobe Express template, plus a demo video script. Sc
 *Cook in concert.*
 Food × Music · Android · TXST Shipaton 2026
 
-Visual: the fermata app icon on ink, next to the Programme screen.
+Visual: `hero.png` (four screens side by side), or the fermata app icon on ink.
 
 ## Slide 2 · The problem
 **Dinner is an orchestra with no conductor.**
@@ -28,22 +32,22 @@ You don't read the kitchen. You *hear* it.
 3. **Conduct:** a live arrangement follows every dish. Chop on the beat, and listen for your cue.
 4. **Tutti:** every dish lands on the same final chord, and the encore plays your dinner back as a song.
 
-## Slide 5 · The score (screenshot: Score screen)
+## Slide 5 · The score (`02-score.png`)
 **38 minutes, one final chord.**
 Solid notes are your hands. Hatched notes are the heat. The "you" lane proves there are never two hands-on tasks at once. Tap an instrument to learn its leitmotif before you cook.
 
-## Slide 6 · The stage (screenshot: Conduct screen)
+## Slide 6 · The stage (`04-hands-on.png`, `06-listen.png`)
 **The tempo is the pace of the work.**
 - *Allegro* 104 bpm: chop on the beat.
 - *Presto* 126 bpm: whisk with the sixteenths.
 - *Adagio*: the rice simmers as a quiet drone you can hear.
 - Before every cue, the dish's leitmotif builds, the harmony leans in, and then a bell rings and the phone buzzes.
 
-## Slide 7 · Life happens (screenshot: re-score notice)
+## Slide 7 · Life happens (`05-rescored.png`)
 **Running late? The score rewrites itself.**
 Tap *+1 minute* or *Done*. Anything already on the heat stays put, and everything else is re-planned in milliseconds. Tutti tells you whether the final chord holds or moves.
 
-## Slide 8 · Finale and encore (screenshot: Finale)
+## Slide 8 · Finale and encore (`07-tutti.png`, `08-finale.png`)
 **Tutti.** *Every dish, together.*
 The encore turns tonight's dinner into a short piece, with each leitmotif entering in the order you cooked it.
 

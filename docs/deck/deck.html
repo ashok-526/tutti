@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tutti: Cook in concert</title>
+<style>
+@font-face { font-family: "Instrument Serif"; src: url("../../app/src/main/res/font/instrument_serif.ttf"); font-style: normal; }
+@font-face { font-family: "Instrument Serif"; src: url("../../app/src/main/res/font/instrument_serif_italic.ttf"); font-style: italic; }
+@font-face { font-family: "Plex Mono"; src: url("../../app/src/main/res/font/plex_mono.ttf"); font-weight: 400; }
+@font-face { font-family: "Plex Mono"; src: url("../../app/src/main/res/font/plex_mono_medium.ttf"); font-weight: 500; }
+:root {
+  --paper:#F3EDE2; --paper-deep:#E9E0D0; --ink:#1C1A16; --ink-soft:#6B6356; --ink-faint:#9C927F; --rule:#D5CAB6;
+  --baton:#D2452F; --stage:#12100D; --stage-line:#302B24; --chalk:#F3EDE2; --chalk-soft:#A59C8C; --lit:#FF6B4E;
+  --salmon:#E0775B; --saffron:#E2B340; --basil:#5F9A64; --sage:#93AE5E; --cocoa:#8A5A44;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #6f6a62; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: var(--ink); }
+.slide { width: 1920px; height: 1080px; position: relative; overflow: hidden; background: var(--paper); padding: 64px 96px 72px; display: flex; flex-direction: column; margin: 0 auto 40px; }
+body.single .slide { display: none; margin: 0; }
+body.single .slide.on { display: flex; }
+.dark { background: var(--stage); color: var(--chalk); }
+.deep { background: var(--paper-deep); }
+.mast { display: flex; align-items: center; gap: 14px; font: 500 18px/1 "Plex Mono"; letter-spacing: .14em; text-transform: uppercase; }
+.mast .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--baton); }
+.dark .mast .dot { background: var(--lit); }
+.mast .right { margin-left: auto; color: var(--ink-faint); }
+.dark .mast .right { color: var(--chalk-soft); }
+.rules { margin-top: 18px; height: 7px; border-top: 2px solid currentColor; border-bottom: 2px solid currentColor; flex: none; }
+.folio { position: absolute; right: 96px; bottom: 40px; font: 500 16px "Plex Mono"; letter-spacing: .14em; color: var(--ink-faint); }
+.dark .folio { color: var(--chalk-soft); }
+.label { font: 500 20px/1 "Plex Mono"; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft); }
+.dark .label { color: var(--chalk-soft); }
+.serif { font-family: "Instrument Serif", Georgia, serif; font-weight: 400; }
+h1, h2, h3 { font-family: "Instrument Serif", Georgia, serif; font-weight: 400; letter-spacing: -0.015em; }
+h2 { font-size: 104px; line-height: .98; }
+em { font-style: italic; color: var(--baton); }
+.dark em { color: var(--lit); }
+.lede { font-size: 32px; line-height: 1.4; color: var(--ink-soft); }
+.dark .lede { color: var(--chalk-soft); }
+.phone { width: 360px; border-radius: 40px; overflow: hidden; background: #000; flex: none; box-shadow: 0 0 0 9px var(--ink), 0 40px 80px rgba(28,26,22,.25); }
+.dark .phone { box-shadow: 0 0 0 9px #2c2821, 0 40px 90px rgba(0,0,0,.6); }
+.phone img { display: block; width: 100%; }
+.row { display: flex; }
+.grow { flex: 1; min-width: 0; }
+.mono { font-family: "Plex Mono", monospace; }
+
+/* II */
+.ticket { position: absolute; width: 460px; padding: 26px 32px 30px; background: #fffdf8; border: 1px solid var(--rule); border-left: 12px solid var(--c); box-shadow: 0 22px 44px rgba(28,26,22,.14); font-family: "Plex Mono"; }
+.ticket .who { font-weight: 500; font-size: 20px; letter-spacing: .16em; color: var(--ink-soft); }
+.ticket .time { font-size: 92px; line-height: 1.05; letter-spacing: -.03em; margin-top: 6px; }
+.ticket .what { font-size: 19px; letter-spacing: .1em; color: var(--ink-soft); margin-top: 4px; }
+
+/* III */
+.pair { display: flex; gap: 24px; padding: 24px 0; border-bottom: 1px solid var(--rule); align-items: baseline; }
+.pair .k { width: 290px; flex: none; font: 500 18px "Plex Mono"; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); }
+.pair .v { font-size: 31px; line-height: 1.3; }
+.times { width: 180px; flex: none; display: flex; align-items: center; justify-content: center; font-family: "Instrument Serif"; font-size: 180px; color: var(--baton); }
+
+/* IV */
+.move .phone { width: 220px; border-radius: 26px; box-shadow: 0 0 0 7px var(--ink), 0 24px 50px rgba(28,26,22,.2); }
+.move .t { font-family: "Instrument Serif"; font-size: 46px; margin-top: 30px; }
+.move .t b { font-weight: 400; color: var(--baton); margin-right: 14px; }
+.move p { font-size: 25px; line-height: 1.35; color: var(--ink-soft); margin-top: 8px; }
+
+/* V */
+.legend { margin-top: 44px; display: grid; grid-template-columns: 110px 1fr; row-gap: 26px; align-items: center; font-size: 31px; }
+.sw-solid { width: 72px; height: 24px; border-radius: 4px; background: var(--salmon); }
+.sw-hatch { width: 72px; height: 16px; border-radius: 3px; background: repeating-linear-gradient(135deg, rgba(95,154,100,.85) 0 2px, rgba(95,154,100,.2) 2px 8px); }
+.sw-lane { display: flex; gap: 6px; } .sw-lane i { display: block; height: 12px; border-radius: 6px; }
+.sw-bar { display: flex; gap: 7px; height: 38px; } .sw-bar i { display: block; background: var(--ink); }
+.stats { display: flex; gap: 64px; margin-top: 56px; padding-top: 28px; border-top: 2px solid var(--ink); }
+.stat .n { font-family: "Instrument Serif"; font-size: 76px; line-height: 1; }
+.stat .l { font: 500 17px "Plex Mono"; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); margin-top: 10px; }
+
+/* VI */
+.tempi { display: grid; grid-template-columns: 230px 150px 1fr; row-gap: 14px; align-items: baseline; margin-top: 40px; }
+.tempi .m { font-family: "Instrument Serif"; font-style: italic; font-size: 48px; }
+.tempi .b { font: 400 22px "Plex Mono"; color: var(--chalk-soft); }
+.tempi .a { font-size: 29px; }
+
+/* VII */
+.btn { font-size: 32px; font-weight: 500; padding: 24px 56px; border-radius: 999px; }
+.btn.ghost { border: 2px solid var(--ink); }
+.btn.solid { background: var(--ink); color: var(--paper); }
+.notice { display: inline-block; background: var(--ink); color: var(--paper); border-radius: 999px; padding: 18px 34px; font-size: 27px; font-weight: 500; }
+
+/* IX */
+.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 48px; margin-top: 64px; }
+.card { border-top: 2px solid var(--ink); padding-top: 28px; }
+.card .n { font-family: "Instrument Serif"; font-size: 56px; color: var(--baton); line-height: 1; }
+.card h3 { font-size: 50px; line-height: 1.02; margin-top: 18px; }
+.card p { font-size: 27px; line-height: 1.38; color: var(--ink-soft); margin-top: 16px; }
+
+/* X */
+.flow { display: flex; align-items: stretch; margin-top: 60px; }
+.box { flex: 1; background: var(--paper); border: 2px solid var(--ink); padding: 22px 20px 24px; min-height: 190px; }
+.box h3 { font-size: 38px; line-height: 1; }
+.box p { font-size: 20px; line-height: 1.35; color: var(--ink-soft); margin-top: 12px; }
+.arrow { width: 54px; flex: none; display: flex; align-items: center; justify-content: center; font-family: "Instrument Serif"; font-size: 48px; color: var(--baton); }
+
+/* XI */
+.next { display: grid; grid-template-columns: 70px 1fr; column-gap: 20px; padding: 26px 0; border-bottom: 1px solid var(--rule); align-items: baseline; }
+.next:first-child { border-top: 2px solid var(--ink); }
+.next .n { font-family: "Instrument Serif"; font-size: 40px; color: var(--baton); }
+.next h3 { font-size: 50px; line-height: 1.05; }
+.next p { font-size: 27px; color: var(--ink-soft); margin-top: 6px; grid-column: 2; }
+</style>
+</head>
+<body>
+
+<!-- I · Title -->
+<section class="slide">
+  <div class="mast"><span class="dot"></span>Tutti<span class="right">TXST Shipaton 2026 · Food × Music · Android</span></div>
+  <div class="rules"></div>
+  <div class="row grow" style="align-items:center; gap:40px;">
+    <div class="grow">
+      <div class="label">A conductor for your kitchen</div>
+      <h1 style="font-size:300px; line-height:.86; margin-top:30px;">Tutti.</h1>
+      <div class="serif" style="font-style:italic; font-size:86px; line-height:1; color:var(--baton); margin-top:14px;">Cook in concert.</div>
+      <p class="lede" style="max-width:800px; margin-top:44px;">Every dish gets its own instrument. The music tells you when to act, so everything reaches the table on the same final chord.</p>
+    </div>
+    <div style="position:relative; width:760px; height:790px; flex:none;">
+      <div class="phone" style="width:330px; position:absolute; left:40px; top:40px; transform:rotate(-5deg);"><img src="../screenshots/01-programme.png"></div>
+      <div class="phone" style="width:330px; position:absolute; right:40px; top:14px; transform:rotate(4deg);"><img src="../screenshots/04-hands-on.png"></div>
+    </div>
+  </div>
+  <div class="serif" style="font-style:italic; font-size:30px; color:var(--ink-faint);">tutti (It.): all together. The moment in a score when the whole orchestra plays at once.</div>
+</section>
+
+<!-- II · Problem -->
+<section class="slide">
+  <div class="mast"><span class="dot"></span>Tutti<span class="right">The problem</span></div>
+  <div class="rules"></div>
+  <div class="row grow" style="gap:80px; align-items:center;">
+    <div style="width:1000px; flex:none;">
+      <div class="label">I · The problem</div>
+      <h2 style="margin-top:30px;">Dinner is an orchestra<br>with <em>no conductor.</em></h2>
+      <p class="lede" style="margin-top:44px; max-width:900px;">Three dishes means three timers, and you have one pair of hands. Timers beep, but they can't tell you which dish, what to do, or how long you have.</p>
+      <p class="lede" style="margin-top:22px; max-width:900px;">It's hardest on new cooks, on anyone with ADHD time blindness, and on anyone with flour on their hands.</p>
+    </div>
+    <div class="grow" style="position:relative; height:700px;">
+      <div class="ticket" style="--c:var(--salmon); left:0; top:10px; transform:rotate(-6deg);"><div class="who">SALMON</div><div class="time" style="color:var(--baton);">00:00</div><div class="what">FLIP NOW · BEEP BEEP BEEP</div></div>
+      <div class="ticket" style="--c:var(--saffron); left:190px; top:190px; transform:rotate(5deg);"><div class="who">RICE</div><div class="time">04:12</div><div class="what">RESTING · DON'T LIFT THE LID</div></div>
+      <div class="ticket" style="--c:var(--basil); left:0; top:370px; transform:rotate(-2deg);"><div class="who">BROCCOLI</div><div class="time">00:37</div><div class="what">SHAKE THE PAN?</div></div>
+      <div class="ticket" style="--c:var(--ink-faint); left:230px; top:560px; transform:rotate(6deg);"><div class="who">OVEN</div><div class="time">425°F</div><div class="what">PREHEATING…</div></div>
+    </div>
+  </div>
+  <div class="folio">II / XII</div>
+</section>
+
+<!-- III · Collision -->
+<section class="slide">
+  <div class="mast"><span class="dot"></span>Tutti<span class="right">The collision</span></div>
+  <div class="rules"></div>
+  <div class="label" style="margin-top:48px;">II · The collision</div>
+  <h2 style="margin-top:26px; font-size:94px;">What becomes possible only because<br><em>food</em> and <em>music</em> collided?</h2>
+  <div class="row" style="margin-top:56px;">
+    <div class="grow">
+      <h3 style="font-size:58px;">The recipe writes the music.</h3>
+      <div style="margin-top:14px; border-top:2px solid var(--ink);">
+        <div class="pair"><div class="k">Steps → sections</div><div class="v">Every step becomes a passage in the score.</div></div>
+        <div class="pair"><div class="k">Dishes → instruments</div><div class="v">Salmon for cello, rice for harp, broccoli for marimba.</div></div>
+        <div class="pair"><div class="k">Actions → tempo</div><div class="v">Chopping is <i>Allegro</i>. Simmering is <i>Adagio</i>.</div></div>
+      </div>
+    </div>
+    <div class="times">×</div>
+    <div class="grow">
+      <h3 style="font-size:58px;">The music runs the kitchen.</h3>
+      <div style="margin-top:14px; border-top:2px solid var(--ink);">
+        <div class="pair"><div class="k">An instrument enters</div><div class="v">A dish needs you.</div></div>
+        <div class="pair"><div class="k">A leitmotif builds</div><div class="v">Its moment is coming.</div></div>
+        <div class="pair"><div class="k">The final chord</div><div class="v">Everything is ready. Serve.</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="serif" style="font-style:italic; font-size:46px; margin-top:auto; color:var(--ink-soft);">You don't read the kitchen. You <em>hear</em> it.</div>
+  <div class="folio">III / XII</div>
+</section>
+
+<!-- IV · How it works -->
+<section class="slide">
+  <div class="mast"><span class="dot"></span>Tutti<span class="right">How it works</span></div>
+  <div class="rules"></div>
+  <div class="label" style="margin-top:40px;">III · How it works</div>
+  <h2 style="margin-top:22px;">Four movements.</h2>
+  <div class="row" style="gap:48px; margin-top:40px;">
+    <div class="move grow"><div class="phone"><img src="../screenshots/01-programme.png"></div><div class="t"><b>I</b>Programme</div><p>Pick your dishes like movements in a concert.</p></div>
+    <div class="move grow"><div class="phone"><img src="../screenshots/02-score.png"></div><div class="t"><b>II</b>Score</div><p>Tutti schedules backwards from the final chord.</p></div>
+    <div class="move grow"><div class="phone"><img src="../screenshots/04-hands-on.png"></div><div class="t"><b>III</b>Conduct</div><p>Live music follows every dish. Chop on the beat.</p></div>
+    <div class="move grow"><div class="phone"><img src="../screenshots/08-finale.png"></div><div class="t"><b>IV</b>Tutti</div><p>Everything lands together. The encore plays it back.</p></div>
+  </div>
+  <div class="folio">IV / XII</div>
+</section>
+
+<!-- V · The score -->
+<section class="slide">
+  <div class="mast"><span class="dot"></span>Tutti<span class="right">The score</span></div>
+  <div class="rules"></div>
+  <div class="row grow" style="gap:110px; align-items:center;">
+    <div class="phone" style="width:370px; margin-left:20px;"><img src="../screenshots/02-score.png"></div>
+    <div class="grow">
+      <div class="label">IV · The score</div>
+      <h2 style="margin-top:26px;">38 minutes,<br><em>one final chord.</em></h2>
+      <div class="legend">
+        <div class="sw-solid"></div><div>Solid notes are your hands.</div>
+        <div class="sw-hatch"></div><div>Hatched notes are the heat doing the work.</div>
+        <div class="sw-lane"><i style="width:22px;background:var(--saffron)"></i><i style="width:30px;background:var(--basil)"></i><i style="width:18px;background:var(--salmon)"></i></div><div>One lane for your hands. Never two tasks at once.</div>
+        <div class="sw-bar"><i style="width:3px"></i><i style="width:8px"></i></div><div>Every dish lands on the double bar.</div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="n">31 / 31</div><div class="l">menus verified by tests</div></div>
+        <div class="stat"><div class="n">0</div><div class="l">overlapping tasks</div></div>
+        <div class="stat"><div class="n">19 min</div><div class="l">hands-on, out of 38</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="folio">V / XII</div>
+</section>
+
+<!-- VI · The stage -->
+<section class="slide dark">
+  <div class="mast"><span class="dot"></span>Tutti<span class="right">The stage</span></div>
+  <div class="rules"></div>
+  <div class="row grow" style="gap:70px; align-items:center;">
+    <div class="grow">
+      <div class="label">V · The stage</div>
+      <h2 style="margin-top:26px; font-size:98px;">The tempo is<br>the <em>pace of the work.</em></h2>
+      <div class="tempi">
+        <div class="m" style="color:var(--salmon)">Allegro</div><div class="b">104 bpm</div><div class="a">chop on the beat</div>
+        <div class="m" style="color:var(--sage)">Presto</div><div class="b">126 bpm</div><div class="a">whisk in sixteenths</div>
+        <div class="m" style="color:var(--saffron)">Andante</div><div class="b">84 bpm</div><div class="a">stir with the phrase</div>
+        <div class="m" style="color:var(--basil)">Adagio</div><div class="b">72 bpm</div><div class="a">the rice simmers as a quiet drone</div>
+        <div class="m" style="color:var(--chalk-soft)">Fermata</div><div class="b">hold</div><div class="a">let it rest</div>
+      </div>
+      <p class="lede" style="margin-top:40px; max-width:780px;">Before every cue, the dish's leitmotif builds and the harmony leans in. Then a bell rings and the phone buzzes.</p>
+    </div>
+    <div class="phone" style="width:330px;"><img src="../screenshots/04-hands-on.png"></div>
+    <div class="phone" style="width:330px; margin-top:90px;"><img src="../screenshots/06-listen.png"></div>
+  </div>
+  <div class="folio">VI / XII</div>
+</section>
+
+<!-- VII · Life happens -->
+<section class="slide">
+  <div class="mast"><span class="dot"></span>Tutti<span class="right">Live re-scoring</span></div>
+  <div class="rules"></div>
+  <div class="row grow" style="gap:110px; align-items:center;">
+    <div class="grow">
+      <div class="label">VI · Life happens</div>
+      <h2 style="margin-top:26px;">Running late?<br><em>The score rewrites itself.</em></h2>
+      <div class="row" style="gap:20px; margin-top:52px;"><div class="btn ghost">+1 minute</div><div class="btn solid">Done</div></div>
+      <p class="lede" style="margin-top:44px; max-width:960px;">Anything already on the heat stays put. Everything not yet started is re-planned on the spot, within each dish's tolerances: how long the rice can rest, how early the salad can be dressed.</p>
+      <div class="notice" style="margin-top:40px;">Re-scored. The final chord moves 0:30 later.</div>
+    </div>
+    <div class="phone" style="width:370px; margin-right:20px;"><img src="../screenshots/05-rescored.png"></div>
+  </div>
+  <div class="folio">VII / XII</div>
+</section>
+
+<!-- VIII · Finale -->
+<section class="slide">
+  <div class="mast"><span class="dot"></span>Tutti<span class="right">Finale & encore</span></div>
+  <div class="rules"></div>
+  <div class="row grow" style="gap:60px; align-items:center;">
+    <div class="phone" style="width:330px; margin-left:20px;"><img src="../screenshots/07-tutti.png"></div>
+    <div class="phone" style="width:330px; margin-top:90px;"><img src="../screenshots/08-finale.png"></div>
+    <div class="grow" style="padding-left:50px;">
+      <div class="label">VII · Finale & encore</div>
+      <h1 style="font-size:230px; line-height:.9; margin-top:28px;">Tutti.</h1>
+      <div class="serif" style="font-style:italic; font-size:76px; line-height:1.05; color:var(--baton);">Every dish, together.</div>
+      <p class="lede" style="margin-top:40px;">When the last dish is ready, the whole orchestra plays the final chord. Then the encore plays tonight's dinner back as a short song, each leitmotif entering in the order you cooked it.</p>
+    </div>
+  </div>
+  <div class="folio">VIII / XII</div>
+</section>
+
+<!-- IX · Impact -->
+<section class="slide">
+  <div class="mast"><span class="dot"></span>Tutti<span class="right">Impact</span></div>
+  <div class="rules"></div>
+  <div class="label" style="margin-top:48px;">VIII · Impact</div>
+  <h2 style="margin-top:26px;">Who it's <em>for.</em></h2>
+  <div class="cards">
+    <div class="card"><div class="n">I</div><h3>New cooks</h3><p>Multi-dish meals without the panic. Tutti does the juggling; you do the cooking.</p></div>
+    <div class="card"><div class="n">II</div><h3>Time blindness</h3><p>Time you can feel through tempo and build-ups, not numbers you have to track.</p></div>
+    <div class="card"><div class="n">III</div><h3>Busy hands, busy eyes</h3><p>Audio-first cues and haptics, with huge type for when you do look.</p></div>
+    <div class="card"><div class="n">IV</div><h3>Holidays &amp; families</h3><p>The big-meal problem, getting everything hot at once, is exactly what Tutti solves.</p></div>
+  </div>
+  <div class="serif" style="font-style:italic; font-size:48px; margin-top:auto;">Fewer burnt dinners. Fewer takeout nights. <em>More people cooking.</em></div>
+  <div class="folio">IX / XII</div>
+</section>
+
+<!-- X · Under the hood -->
+<section class="slide deep">
+  <div class="mast"><span class="dot"></span>Tutti<span class="right">Under the hood</span></div>
+  <div class="rules"></div>
+  <div class="label" style="margin-top:44px;">IX · Under the hood</div>
+  <h2 style="margin-top:24px;">Built from scratch, <em>in a day.</em></h2>
+  <div class="flow">
+    <div class="box"><h3>Recipes</h3><p>Steps, hands-on or heat, allowed gaps, hold tolerance, tempo marking.</p></div>
+    <div class="arrow">→</div>
+    <div class="box"><h3>Conductor</h3><p>Backward scheduler: one lane for your hands, hill-climb repair, live re-scoring.</p></div>
+    <div class="arrow">→</div>
+    <div class="box"><h3>Performance</h3><p>Session clock, cues, build-ups, haptics, rehearsal speed.</p></div>
+    <div class="arrow">→</div>
+    <div class="box"><h3>Orchestra</h3><p>Sample-accurate 16th-note sequencer and the arrangement rules.</p></div>
+    <div class="arrow">→</div>
+    <div class="box"><h3>Synth</h3><p>48 voices, 12 instruments, FM bells, reverb. Zero allocations while rendering.</p></div>
+  </div>
+  <div class="stats" style="margin-top:60px;">
+    <div class="stat"><div class="n">48</div><div class="l">synth voices</div></div>
+    <div class="stat"><div class="n">12</div><div class="l">instruments</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">audio files shipped</div></div>
+    <div class="stat"><div class="n">1.2 MB</div><div class="l">release APK</div></div>
+  </div>
+  <div class="mono" style="font-size:22px; color:var(--ink-soft); margin-top:auto;">Kotlin · Jetpack Compose (no Material) · AudioTrack float PCM · Canvas-drawn notation · JUnit</div>
+  <div class="folio">X / XII</div>
+</section>
+
+<!-- XI · Next -->
+<section class="slide">
+  <div class="mast"><span class="dot"></span>Tutti<span class="right">What's next</span></div>
+  <div class="rules"></div>
+  <div class="row grow" style="gap:110px;">
+    <div style="width:600px; flex:none;">
+      <div class="label" style="margin-top:48px;">X · What's next</div>
+      <h2 style="margin-top:26px; font-size:130px;">Next<br><em>movements.</em></h2>
+    </div>
+    <div class="grow" style="margin-top:56px;">
+      <div class="next"><div class="n">I</div><h3>Say “done” out loud</h3><p>Voice control, for when your hands are messy.</p></div>
+      <div class="next"><div class="n">II</div><h3>Score any recipe</h3><p>Paste a recipe link and Tutti writes the score.</p></div>
+      <div class="next"><div class="n">III</div><h3>The heat reports in</h3><p>Smart ovens and thermometers send their own cues.</p></div>
+      <div class="next"><div class="n">IV</div><h3>Ensemble mode</h3><p>Two cooks, two lanes, one score.</p></div>
+      <div class="next"><div class="n">V</div><h3>A conductor on your wrist</h3><p>Haptic cues on your watch.</p></div>
+    </div>
+  </div>
+  <div class="folio">XI / XII</div>
+</section>
+
+<!-- XII · Close -->
+<section class="slide dark" style="justify-content:center; align-items:center; text-align:center;">
+  <svg width="220" height="130" viewBox="0 0 220 130" aria-hidden="true">
+    <path d="M22 112 A88 88 0 0 1 198 112" fill="none" stroke="#F3EDE2" stroke-width="12" stroke-linecap="round"/>
+    <circle cx="110" cy="92" r="14" fill="#FF6B4E"/>
+  </svg>
+  <h2 style="font-size:150px; line-height:.98; margin-top:48px;">When you hear <em>tutti</em>,<br>you serve.</h2>
+  <div class="mono" style="font-size:28px; letter-spacing:.06em; color:var(--chalk-soft); margin-top:64px;">github.com/&lt;your-handle&gt;/tutti</div>
+  <div class="label" style="margin-top:20px;">Tutti · Food × Music · TXST Shipaton 2026</div>
+</section>
+
+<script>
+  const n = parseInt(location.hash.slice(1), 10);
+  if (n) {
+    document.body.classList.add('single');
+    const slide = document.querySelectorAll('.slide')[n - 1];
+    if (slide) slide.classList.add('on');
+  }
+</script>
+</body>
+</html>

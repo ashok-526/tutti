@@ -154,6 +154,8 @@ class Orchestra {
         var recorded = 0L
         val startNs = System.nanoTime()
         var written = 0L
+        // Sample 0 of any recording lines up with this moment, not with when start() was called.
+        android.util.Log.i("Tutti", "audio-start ${System.currentTimeMillis()}")
 
         while (running) {
             var pos = 0

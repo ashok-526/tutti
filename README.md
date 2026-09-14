@@ -6,15 +6,10 @@
 
 **TXST Shipaton 2026 · Food × Music** · Native Android · Kotlin + Jetpack Compose · Real-time synthesis engine written from scratch
 
-<p align="center">
-  <img src="docs/screenshots/01-programme.png" width="19%" alt="Programme: pick your dishes" />
-  <img src="docs/screenshots/02-score.png" width="19%" alt="Score: the schedule as staves" />
-  <img src="docs/screenshots/04-hands-on.png" width="19%" alt="Conduct: a hands-on cue" />
-  <img src="docs/screenshots/05-rescored.png" width="19%" alt="Live re-scoring" />
-  <img src="docs/screenshots/08-finale.png" width="19%" alt="Finale" />
-</p>
+![Tutti: the Programme, the Score, the stage during a hands-on cue, and the Finale](docs/screenshots/hero.png)
 
 🎬 **Demo video (with the app's own audio):** [`docs/demo/tutti-demo.mp4`](docs/demo/tutti-demo.mp4)
+🎼 **Presentation kit:** 12 slides as 1920×1080 PNGs in [`docs/deck/slides/`](docs/deck/slides) (source: [`docs/deck/deck.html`](docs/deck/deck.html)), plus slide copy and a demo script in [`docs/PITCH.md`](docs/PITCH.md)
 
 ---
 
@@ -38,7 +33,7 @@ Timers beep; Tutti *sings*. Hearing that the harp has come in is faster, calmer 
 ## How it works
 
 1. **Programme.** Pick your dishes like movements in a concert programme. Each dish is scored for its own instrument: salmon for cello, rice for harp, broccoli for marimba, salad for flute, mug cake for celesta.
-2. **Score.** Tutti's scheduler works *backwards* from the final chord. It keeps a single lane for your hands (you never get two hands-on tasks at once, with a 30-second breath between them) and places passive heat as late as possible. It also respects each recipe's tolerances: how long ingredients can wait between steps, and how early a dish can finish and still be served at its best. The score screen shows the plan as staves, with solid notes for your hands, hatched notes for the heat, and a double bar where everything lands. Tap an instrument to hear its leitmotif before you start.
+2. **Score.** Tutti's scheduler works *backwards* from the final chord. It keeps a single lane for your hands (you never get two hands-on tasks at once, and it leaves a 30-second breather between them whenever it can) and places passive heat as late as possible. It also respects each recipe's tolerances: how long ingredients can wait between steps, and how early a dish can finish and still be served at its best. The score screen shows the plan as staves, with solid notes for your hands, hatched notes for the heat, and a double bar where everything lands. Tap an instrument to hear its leitmotif before you start.
 3. **Conduct.** Raise the baton for a four-beat count-in, and the kitchen becomes a stage. A live, generative arrangement in D major follows exactly what every dish is doing:
    - **Hands-on steps** play a rhythmic ostinato on the dish's instrument, shaped by the action (staccato for chopping, flowing arpeggios for stirring, syncopation and sizzle for searing) over a kick you can work to.
    - **Passive steps** play quiet textures: bubbling for boiling, long sustained notes for roasting, a soft recurring note for resting.
@@ -51,7 +46,7 @@ Timers beep; Tutti *sings*. Hearing that the harp has come in is faster, calmer 
 
 ## Engineering
 
-- **Scheduler** (`schedule/Conductor.kt`): a backward, latest-start placement over a single hands-on resource. It uses one step of lookahead so it doesn't take a slot another dish can't live without, and a repair loop that uses each dish's hold tolerance when a tight chain collides with another dish. The same solver re-plans mid-performance, taking steps already started as fixed and "no earlier than now" as a hard floor.
+- **Scheduler** (`schedule/Conductor.kt`): backward placement over a single hands-on resource. Tasks with the tightest windows go first (earliest-deadline-first, run in reverse), with one step of lookahead so no dish takes a slot another dish can't live without. A hill-climb then uses each dish's hold tolerance to remove any waiting, and drops the 30-second breather only if that's the last way to keep food from sitting. The same solver re-plans mid-performance, taking steps already started as fixed and "no earlier than now" as a hard floor. Unit tests cover all 31 possible menus: no overlapping hands-on tasks, every allowed gap and hold time respected, and live re-scoring stays valid.
 - **Synthesizer** (`audio/Synth.kt`): a 48-voice polyphonic synth written from scratch, rendering float PCM sample by sample. It has twelve patches: filtered-saw cello, plucked harp, marimba with an inharmonic partial, breathy flute, celesta, FM bell, a detuned pad, bass, kick, hat and shaker. Voices are stored as preallocated primitive arrays, so rendering allocates nothing. A trimmed Freeverb adds the room.
 - **Orchestra** (`audio/Orchestra.kt`): a sample-accurate 16th-note sequencer on a dedicated `URGENT_AUDIO` thread feeding `AudioTrack`. Tempo changes land on bar lines. The UI thread only publishes what each dish is doing; every musical decision is made on the audio thread. It can also record the performance to WAV.
 - **UI** (`ui/`): Jetpack Compose with no Material components. The type is Instrument Serif and IBM Plex Mono, the palette is a concert programme (paper and ink) that turns into a dark stage while you cook, the score and notation are drawn on Canvas, and beat-synced motion reads the audio clock every frame.
@@ -71,7 +66,8 @@ app/src/main/java/app/tutti/
 Requirements: JDK 17 and the Android SDK (compileSdk 35).
 
 ```bash
-./gradlew :app:installDebug
+./gradlew :app:installDebug        # build and install on a device or emulator
+./gradlew :app:testDebugUnitTest   # scheduler tests across every menu combination
 ```
 
 Or open the folder in Android Studio and run the `app` configuration. Tutti works on Android 8.0+ (API 26). Put your phone somewhere you can hear it, or use a Bluetooth speaker in the kitchen.
