@@ -2,21 +2,26 @@ package app.tutti.ui
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,12 +29,10 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,19 +44,14 @@ import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
-import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.tutti.schedule.Score
@@ -62,299 +60,272 @@ import app.tutti.session.Performance
 import app.tutti.session.Phase
 import app.tutti.session.TuttiState
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlin.math.floor
+import kotlin.math.pow
 
 @Composable
 fun ConductScreen(state: TuttiState, performance: Performance) {
     LaunchedEffect(performance) { performance.run() }
     LaunchedEffect(performance.finished) {
         if (performance.finished) {
-            delay(3200)
+            delay(3400)
             state.finale()
         }
     }
 
-    var beat by remember { mutableDoubleStateOf(0.0) }
-    LaunchedEffect(Unit) { while (true) withFrameMillis { beat = state.orchestra.beatClock } }
-    val beatNow = { beat }
-
+    val colors = tutti
+    val motion = animationsEnabled()
     val score = performance.score
     val now = performance.now
     val current = performance.currentHandsOn()
+    val total = maxOf(score.tutti, score.slots.maxOf { it.end }).toFloat()
+
+    var beat by remember { mutableDoubleStateOf(0.0) }
+    val spin = remember { Animatable(0f) }
+    LaunchedEffect(performance.finished, motion) {
+        if (performance.finished) {
+            if (motion) spin.animateTo(spin.value + 70f, tween(2600, easing = Motion.out))
+            return@LaunchedEffect
+        }
+        while (isActive) {
+            withFrameMillis { beat = state.orchestra.beatClock }
+            if (motion) spin.snapTo(((beat * 45.0) % 360.0).toFloat())
+        }
+    }
+
+    val drop = remember { Animatable(0f) }
+    LaunchedEffect(performance, performance.finished) {
+        if (!performance.finished) {
+            if (!motion) { drop.snapTo(1f); return@LaunchedEffect }
+            delay(300)
+            drop.animateTo(1f, tween(2200, easing = Motion.inOut))
+        } else {
+            delay(1000)
+            if (motion) drop.animateTo(0f, tween(1000, easing = Motion.inOut)) else drop.snapTo(0f)
+        }
+    }
+    val arm by animateFloatAsState(
+        targetValue = if (performance.finished) 1f else (now / total).coerceIn(0f, 1f),
+        animationSpec = spring(dampingRatio = 1f, stiffness = Spring.StiffnessMediumLow),
+        label = "arm",
+    )
 
     val glow = remember { Animatable(0f) }
     val flash = performance.flash
     LaunchedEffect(flash) {
         if (flash != null) {
             glow.snapTo(1f)
-            glow.animateTo(0f, tween(1600, easing = LinearOutSlowInEasing))
+            glow.animateTo(0f, tween(1400, easing = Motion.out))
         }
     }
-    val flashColor = flash?.let { score.recipes[it.dish].color } ?: Color.Transparent
+
+    val paper by animateColorAsState(
+        targetValue = current?.let { score.recipes[it.dish].color } ?: colors.label,
+        animationSpec = tween(220, easing = Motion.out),
+        label = "label",
+    )
 
     var shownNotice by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(performance.rescored) {
         shownNotice = performance.notice
-        delay(3400)
+        delay(3600)
         shownNotice = null
     }
     var muted by remember { mutableStateOf(state.orchestra.muted) }
 
-    Box(
-        Modifier
-            .fillMaxSize()
-            .background(Palette.stage)
-            .drawBehind {
-                drawRect(
-                    Brush.radialGradient(
-                        listOf(flashColor.copy(alpha = 0.32f * glow.value), Color.Transparent),
-                        center = Offset(size.width * 0.5f, size.height * 0.48f),
-                        radius = size.width * 1.1f,
-                    ),
-                )
-            },
-    ) {
+    val label = when {
+        !performance.started -> DiscLabel(top = "SIDE A", main = "${performance.countIn.coerceAtLeast(1)}", sub = "COUNT IN", bottom = "NEEDLE DOWN")
+        performance.finished -> DiscLabel(top = "SIDE A", main = "Tutti", sub = "SERVE NOW", bottom = "EVERY DISH READY")
+        else -> DiscLabel(
+            top = "SERVE AT ${clockTime(((score.tutti - now) / performance.speed).toInt())}",
+            main = formatClock((score.tutti - now).toInt()),
+            sub = "TO SERVE",
+            bottom = current?.let { "${score.recipes[it.dish].instrument.label.uppercase()} NEEDS YOU" } ?: "HANDS FREE",
+        )
+    }
+
+    Box(Modifier.fillMaxSize().background(colors.plinth)) {
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
-            Row(Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    Modifier.size(44.dp).pressable { state.back() }
-                        .semantics { contentDescription = "Stop the performance"; role = Role.Button },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CloseIcon(Palette.chalkSoft)
-                }
-                Spacer(Modifier.weight(1f))
-                Box(
-                    Modifier.size(6.dp).graphicsLayer {
-                        alpha = 0.4f + 0.6f * (1f - (beatNow() % 1.0).toFloat())
-                    }.clip(CircleShape).background(Palette.batonLit),
+            Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                GlyphButton(Glyphs.Close, "Stop the performance", onClick = { state.back() })
+                Text(
+                    if (performance.speed > 1f) "REHEARSAL  ${performance.speed.toInt()}×" else "LIVE",
+                    style = Type.label.copy(color = colors.inkMuted),
+                    modifier = Modifier.weight(1f).padding(start = 8.dp),
                 )
-                Spacer(Modifier.width(8.dp))
-                Label(if (performance.speed > 1f) "Rehearsal · ${performance.speed.toInt()}×" else "Live", Palette.chalkSoft)
-                Spacer(Modifier.weight(1f))
-                Box(
-                    Modifier.size(44.dp).pressable {
+                GlyphButton(
+                    if (muted) Glyphs.VolumeOff else Glyphs.VolumeOn,
+                    if (muted) "Unmute the orchestra" else "Mute the orchestra",
+                    onClick = {
                         muted = !muted
                         state.orchestra.muted = muted
-                    }.semantics {
-                        contentDescription = if (muted) "Unmute the orchestra" else "Mute the orchestra"
-                        role = Role.Button
                     },
-                    contentAlignment = Alignment.Center,
-                ) { SpeakerIcon(Palette.chalkSoft, muted) }
+                )
             }
 
-            Row(Modifier.padding(horizontal = 24.dp).padding(top = 6.dp), verticalAlignment = Alignment.Bottom) {
-                Column(Modifier.weight(1f)) {
-                    Label("Tutti in", Palette.chalkFaint)
-                    BasicText(formatClock((score.tutti - now).toInt()), style = Type.clock.copy(color = Palette.chalk))
-                }
-                Column(horizontalAlignment = Alignment.End, modifier = Modifier.padding(bottom = 14.dp)) {
-                    Label("Tempo", Palette.chalkFaint)
-                    BasicText(
-                        "${state.orchestra.bpm.toInt()} bpm",
-                        style = Type.mono.copy(color = Palette.chalkSoft),
-                    )
-                }
-            }
-
-            ScoreTimeline(
-                score, Modifier.padding(horizontal = 18.dp).padding(top = 4.dp),
-                now = now, dark = true, rowHeight = 20.dp, showAxis = false, showLane = false,
+            Turntable(
+                score = score,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(340.dp)
+                    .semantics { contentDescription = "Record playing. ${formatClock((score.tutti - now).toInt())} until serving." },
+                label = label,
+                labelPaper = paper,
+                center = { Offset(it.width * 0.45f, it.height * 0.52f) },
+                radius = { minOf(it.width * 0.39f, it.height * 0.43f) },
+                now = { if (performance.started) now else null },
+                rotation = { spin.value },
+                strobe = { ((1.0 - (beat - floor(beat))).pow(3.0)).toFloat() },
+                arm = { arm },
+                armDrop = { drop.value },
+                cueLit = { current != null },
+                flashDish = flash?.dish ?: -1,
+                flash = { glow.value },
             )
 
-            Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
-                Spacer(Modifier.height(22.dp))
+            Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())) {
                 AnimatedContent(
-                    targetState = current?.let { it.dish * 1000 + it.step } ?: -1,
+                    targetState = when {
+                        !performance.started -> "countin"
+                        performance.finished -> "done"
+                        current != null -> "hands:${current.dish}:${current.step}"
+                        else -> "free"
+                    },
                     transitionSpec = {
-                        (fadeIn(tween(420)) + slideInVertically(tween(420)) { it / 6 }) togetherWith fadeOut(tween(180))
+                        (fadeIn(tween(220, easing = Motion.out)) + slideInVertically(tween(260, easing = Motion.out)) { it / 8 }) togetherWith
+                            fadeOut(tween(120))
                     },
                     label = "now",
                 ) { key ->
-                    val slot = score.slots.firstOrNull { it.dish * 1000 + it.step == key }
-                    if (slot != null) HandsPanel(score, slot, now, beatNow) else FreePanel(performance, now)
-                }
-                Spacer(Modifier.height(22.dp))
-                Column(Modifier.padding(horizontal = 24.dp)) {
-                    Label("The orchestra", Palette.chalkFaint)
-                    Spacer(Modifier.height(8.dp))
-                    score.recipes.indices.forEach { d -> DishLine(performance, d, beatNow) }
-                }
-                val upNext = performance.upcoming(3)
-                if (upNext.isNotEmpty()) {
-                    Spacer(Modifier.height(18.dp))
-                    Column(Modifier.padding(horizontal = 24.dp)) {
-                        Label("Up next", Palette.chalkFaint)
-                        Spacer(Modifier.height(6.dp))
-                        upNext.forEach { slot ->
-                            val recipe = score.recipes[slot.dish]
-                            val step = recipe.steps[slot.step]
-                            Row(Modifier.fillMaxWidth().padding(vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
-                                BasicText(
-                                    "in ${formatClock((slot.start - now).toInt())}",
-                                    style = Type.mono.copy(color = Palette.chalkSoft, fontSize = 12.sp),
-                                    modifier = Modifier.width(78.dp),
-                                )
-                                Box(Modifier.size(7.dp).clip(CircleShape).background(recipe.color))
-                                Spacer(Modifier.width(12.dp))
-                                BasicText(
-                                    step.title,
-                                    style = Type.heading.copy(fontSize = 19.sp, lineHeight = 22.sp, color = Palette.chalk),
-                                    modifier = Modifier.weight(1f),
-                                    maxLines = 1,
-                                )
-                                Label(if (step.handsOn) "Hands" else "Heat", if (step.handsOn) Palette.chalkSoft else Palette.chalkFaint)
-                            }
+                    when {
+                        key == "countin" -> Moment("Needle down.", "The first cue lands on the downbeat. Listen for each dish's theme.")
+                        key == "done" -> Moment("Every dish is ready.", "The final chord is playing. Serve.")
+                        key.startsWith("hands") -> {
+                            val slot = score.slots.firstOrNull { "hands:${it.dish}:${it.step}" == key }
+                            if (slot != null) HandsPanel(score, slot, now) { beat } else FreePanel(performance, now)
                         }
+                        else -> FreePanel(performance, now)
                     }
                 }
-                Spacer(Modifier.height(12.dp))
+                Column(Modifier.padding(start = 24.dp, end = 20.dp, top = 20.dp, bottom = 8.dp)) {
+                    score.recipes.indices.forEach { d -> DishLine(performance, d) }
+                }
             }
 
+            val enabled = current != null && performance.started && !performance.finished
             Row(
-                Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 14.dp),
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(top = 4.dp, bottom = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
             ) {
-                val enabled = current != null && performance.started && !performance.finished
-                Box(Modifier.weight(1f).graphicsLayer { alpha = if (enabled) 1f else 0.35f }) {
-                    GhostButton("+1 minute", onClick = { if (enabled) performance.needMore() }, color = Palette.chalk, modifier = Modifier.fillMaxWidth())
-                }
-                Box(Modifier.weight(1f)) {
-                    if (enabled) {
-                        PillButton(
-                            "Done", onClick = { performance.done() }, arrow = false,
-                            container = Palette.chalk, content = Palette.stage, modifier = Modifier.fillMaxWidth(),
-                        )
-                    } else {
-                        GhostButton("Done", onClick = {}, color = Palette.chalkFaint, modifier = Modifier.fillMaxWidth())
-                    }
-                }
+                SecondaryButton("+1 minute", onClick = { performance.needMore() }, enabled = enabled, modifier = Modifier.weight(1f))
+                PrimaryButton("Done", onClick = { performance.done() }, enabled = enabled, signal = true, modifier = Modifier.weight(1f))
             }
         }
 
         AnimatedVisibility(
             visible = shownNotice != null,
-            modifier = Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = 60.dp),
-            enter = fadeIn() + slideInVertically { -it },
-            exit = fadeOut(),
+            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 148.dp, start = 16.dp, end = 16.dp),
+            enter = fadeIn(tween(200, easing = Motion.out)) + slideInVertically(tween(240, easing = Motion.out)) { it / 2 },
+            exit = fadeOut(tween(150)) + slideOutVertically(tween(150)) { it / 3 },
         ) {
-            BasicText(
-                shownNotice ?: "",
-                style = Type.small.copy(color = Palette.stage, fontWeight = FontWeight.Medium),
-                modifier = Modifier
-                    .semantics { liveRegion = LiveRegionMode.Polite }
-                    .clip(RoundedCornerShape(50))
-                    .background(Palette.chalk)
-                    .padding(horizontal = 18.dp, vertical = 10.dp),
-            )
-        }
-
-        AnimatedVisibility(
-            visible = !performance.started,
-            enter = fadeIn(),
-            exit = fadeOut(tween(700)),
-        ) {
-            Box(Modifier.fillMaxSize().background(Palette.stage), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Label("Count-in", Palette.chalkFaint)
-                    AnimatedContent(
-                        targetState = performance.countIn,
-                        transitionSpec = { (scaleIn(initialScale = 1.5f) + fadeIn(tween(160))) togetherWith fadeOut(tween(120)) },
-                        label = "count",
-                    ) { n ->
-                        BasicText(
-                            if (n == 0) " " else "$n",
-                            style = Type.display.copy(fontSize = 180.sp, lineHeight = 190.sp, color = if (n == 4) Palette.batonLit else Palette.chalk),
-                        )
-                    }
-                    BasicText("The first cue lands on the downbeat.", style = Type.italic.copy(color = Palette.chalkSoft, fontSize = 20.sp))
-                }
-            }
-        }
-
-        AnimatedVisibility(
-            visible = performance.finished,
-            enter = fadeIn(tween(900)),
-            exit = fadeOut(),
-        ) {
-            Box(Modifier.fillMaxSize().background(Palette.stage.copy(alpha = 0.92f)), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    BasicText("Tutti.", style = Type.display.copy(fontSize = 110.sp, lineHeight = 110.sp, color = Palette.chalk))
-                    BasicText("Everything, together. Serve.", style = Type.italic.copy(color = Palette.batonLit, fontSize = 24.sp))
-                }
+            Snackbar(
+                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                containerColor = colors.ink,
+                contentColor = colors.onInk,
+                shape = CircleShape,
+            ) {
+                Text(shownNotice ?: "", style = Type.button.copy(color = colors.onInk))
             }
         }
     }
 }
 
 @Composable
+private fun Moment(headline: String, body: String) {
+    val colors = tutti
+    Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp)) {
+        Text(headline, style = Type.headline.copy(color = colors.ink), modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
+        Text(body, style = Type.body.copy(color = colors.inkMuted), modifier = Modifier.padding(top = 8.dp))
+    }
+}
+
+@Composable
 private fun HandsPanel(score: Score, slot: Slot, now: Float, beat: () -> Double) {
+    val colors = tutti
     val recipe = score.recipes[slot.dish]
     val step = recipe.steps[slot.step]
-    val left = (slot.end - now).toInt()
-    val progress = ((now - slot.start) / slot.length.coerceAtLeast(1)).coerceIn(0f, 1f)
-
-    Column(Modifier.padding(horizontal = 24.dp)) {
+    Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(9.dp).clip(CircleShape).background(recipe.color))
-            Spacer(Modifier.width(10.dp))
-            Label("Your hands · ${recipe.instrument.label}", Palette.chalkSoft)
+            Tag("Your hands", cue = true)
+            LabelMark(recipe.color, size = 16.dp, modifier = Modifier.padding(start = 12.dp))
+            Text(
+                "${recipe.instrument.label}, ${recipe.name}",
+                style = Type.bodySmall.copy(color = colors.inkMuted),
+                modifier = Modifier.padding(start = 6.dp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
-        Spacer(Modifier.height(12.dp))
-        BasicText(
+        Text(
             step.title,
-            style = Type.title.copy(fontSize = 44.sp, lineHeight = 46.sp, color = Palette.chalk),
-            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+            style = Type.headline.copy(color = colors.ink, fontSize = 34.sp, lineHeight = 38.sp),
+            modifier = Modifier.padding(top = 12.dp).semantics { liveRegion = LiveRegionMode.Polite },
+            maxLines = 2,
         )
-        Spacer(Modifier.height(8.dp))
-        BasicText(step.detail, style = Type.body.copy(color = Palette.chalkSoft, fontSize = 16.sp))
-        Spacer(Modifier.height(20.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            BasicText(step.action.marking, style = Type.italic.copy(color = recipe.color, fontSize = 26.sp))
-            BasicText("  ${step.action.hint}", style = Type.small.copy(color = Palette.chalkSoft), modifier = Modifier.weight(1f))
-            BeatDots(beat, recipe.color)
-        }
-        Spacer(Modifier.height(16.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.weight(1f).height(3.dp).clip(RoundedCornerShape(50)).background(Palette.stageLine)) {
-                Box(Modifier.fillMaxHeight().fillMaxWidth(progress).background(recipe.color))
-            }
-            Spacer(Modifier.width(12.dp))
-            BasicText("${formatClock(left)} left", style = Type.mono.copy(color = Palette.chalkSoft, fontSize = 12.sp))
+        Text(step.detail, style = Type.body.copy(color = colors.inkMuted), modifier = Modifier.padding(top = 6.dp), maxLines = 2)
+        Row(Modifier.padding(top = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(step.action.marking, style = Type.time.copy(color = colors.ink))
+            Text(step.action.hint, style = Type.bodySmall.copy(color = colors.inkMuted), modifier = Modifier.padding(start = 10.dp).weight(1f), maxLines = 1)
+            BeatPips(beat)
+            Text(
+                formatClock((slot.end - now).toInt()),
+                style = Type.time.copy(color = colors.ink),
+                modifier = Modifier.padding(start = 14.dp),
+            )
         }
     }
 }
 
 @Composable
 private fun FreePanel(performance: Performance, now: Float) {
+    val colors = tutti
     val score = performance.score
     val next = score.cues.firstOrNull { it.start > now && score.stepOf(it).handsOn }
-    Column(Modifier.padding(horizontal = 24.dp)) {
-        Label("Your hands are free", Palette.chalkSoft, Modifier.semantics { liveRegion = LiveRegionMode.Polite })
-        Spacer(Modifier.height(12.dp))
+    Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp)) {
+        Tag("Hands free", modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
         if (next != null) {
             val recipe = score.recipes[next.dish]
-            BasicText("Listen for the", style = Type.title.copy(fontSize = 44.sp, lineHeight = 46.sp, color = Palette.chalk))
-            BasicText(recipe.instrument.label.lowercase() + ".", style = Type.title.copy(fontSize = 44.sp, lineHeight = 46.sp, color = recipe.color, fontStyle = FontStyle.Italic))
-            Spacer(Modifier.height(10.dp))
-            BasicText(
-                "${recipe.steps[next.step].title} in ${formatClock((next.start - now).toInt())}. Its leitmotif will build as the moment comes.",
-                style = Type.body.copy(color = Palette.chalkSoft, fontSize = 16.sp),
+            Text(
+                "Next: ${recipe.steps[next.step].title}",
+                style = Type.headline.copy(color = colors.ink, fontSize = 34.sp, lineHeight = 38.sp),
+                modifier = Modifier.padding(top = 12.dp),
+                maxLines = 2,
             )
+            Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                LabelMark(recipe.color, size = 16.dp)
+                Text(
+                    "The ${recipe.instrument.label.lowercase()} comes in with its theme in ${formatClock((next.start - now).toInt())}.",
+                    style = Type.body.copy(color = colors.inkMuted),
+                    modifier = Modifier.padding(start = 8.dp),
+                )
+            }
         } else {
-            BasicText("Let the heat", style = Type.title.copy(fontSize = 44.sp, lineHeight = 46.sp, color = Palette.chalk))
-            BasicText("finish the piece.", style = Type.title.copy(fontSize = 44.sp, lineHeight = 46.sp, color = Palette.batonLit, fontStyle = FontStyle.Italic))
-            Spacer(Modifier.height(10.dp))
-            BasicText("Nothing left for your hands. Warm the plates.", style = Type.body.copy(color = Palette.chalkSoft, fontSize = 16.sp))
+            Text(
+                "The heat finishes it.",
+                style = Type.headline.copy(color = colors.ink, fontSize = 34.sp, lineHeight = 38.sp),
+                modifier = Modifier.padding(top = 12.dp),
+            )
+            Text("Nothing left for your hands. Warm the plates.", style = Type.body.copy(color = colors.inkMuted), modifier = Modifier.padding(top = 8.dp))
         }
     }
 }
 
+/** Four pips, one per beat of the bar: the downbeat you can chop to. */
 @Composable
-private fun BeatDots(beat: () -> Double, color: Color) {
-    Row(horizontalArrangement = Arrangement.spacedBy(7.dp), verticalAlignment = Alignment.CenterVertically) {
+private fun BeatPips(beat: () -> Double) {
+    val colors = tutti
+    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
         repeat(4) { i ->
             Box(
                 Modifier
@@ -363,54 +334,71 @@ private fun BeatDots(beat: () -> Double, color: Color) {
                         val b = beat()
                         val lit = floor(b).toInt().mod(4) == i
                         val phase = (b - floor(b)).toFloat()
-                        val s = if (lit) 1f + 0.6f * (1f - phase) * (1f - phase) else 1f
+                        val s = if (lit) 1f + 0.5f * (1f - phase) * (1f - phase) else 1f
                         scaleX = s
                         scaleY = s
-                        alpha = if (lit) 1f else 0.25f
+                        alpha = if (lit) 1f else 0.28f
                     }
                     .clip(CircleShape)
-                    .background(color),
+                    .background(colors.ink),
             )
         }
     }
 }
 
+/** A dish's state, told four ways: waiting, cooking, needs you, holding. */
 @Composable
-private fun DishLine(performance: Performance, dish: Int, beat: () -> Double) {
-    val score = performance.score
-    val recipe = score.recipes[dish]
+private fun DishLine(performance: Performance, dish: Int) {
+    val colors = tutti
+    val recipe = performance.score.recipes[dish]
     val status = performance.dishNow(dish)
     val step = status.slot?.let { recipe.steps[it.step] }
-    val (line, aside) = when (status.phase) {
-        Phase.READY -> "Ready, holding for the chord" to "✓"
-        Phase.ACTIVE -> (step?.title ?: "") to "hands"
-        Phase.COOKING -> (step?.title ?: "") to formatClock(status.secondsLeft)
-        Phase.WAITING -> "Enters with “${step?.title ?: ""}”" to "in ${formatClock(status.secondsLeft)}"
+    val detail = when (status.phase) {
+        Phase.ACTIVE, Phase.COOKING -> step?.title ?: ""
+        Phase.WAITING -> "Starts with ${step?.title ?: "its first step"}"
+        Phase.READY -> "Holding for the final chord"
     }
-    val sounding = status.phase == Phase.ACTIVE || status.phase == Phase.COOKING
-
-    Row(Modifier.fillMaxWidth().padding(vertical = 9.dp), verticalAlignment = Alignment.CenterVertically) {
+    val background: Color
+    val content: Color
+    val border: Color
+    val reading: String
+    when (status.phase) {
+        Phase.ACTIVE -> { background = colors.cue; content = colors.onCue; border = colors.cueEdge; reading = "hands" }
+        Phase.COOKING -> { background = colors.sunken; content = colors.ink; border = Color.Transparent; reading = formatClock(status.secondsLeft) }
+        Phase.WAITING -> { background = Color.Transparent; content = colors.inkMuted; border = colors.line; reading = "in ${formatClock(status.secondsLeft)}" }
+        Phase.READY -> { background = colors.ink; content = colors.onInk; border = Color.Transparent; reading = "ready" }
+    }
+    val description = when (status.phase) {
+        Phase.ACTIVE -> "${recipe.name} needs your hands"
+        Phase.COOKING -> "${recipe.name} cooking, ${formatClock(status.secondsLeft)} left"
+        Phase.WAITING -> "${recipe.name} starts in ${formatClock(status.secondsLeft)}"
+        Phase.READY -> "${recipe.name} ready"
+    }
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .heightIn(min = 52.dp)
+            .semantics(mergeDescendants = true) { contentDescription = description },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        LabelMark(recipe.color, size = 24.dp)
+        Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
+            Text(recipe.instrument.label, style = Type.button.copy(color = colors.ink))
+            Text(
+                detail,
+                style = Type.bodySmall.copy(color = colors.inkMuted),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
         Box(
             Modifier
-                .size(10.dp)
-                .graphicsLayer {
-                    val phase = (beat() % 1.0).toFloat()
-                    val s = if (sounding) 1f + 0.35f * (1f - phase) * (1f - phase) else 1f
-                    scaleX = s
-                    scaleY = s
-                    alpha = if (status.phase == Phase.WAITING) 0.35f else 1f
-                }
                 .clip(CircleShape)
-                .background(recipe.color),
-        )
-        Spacer(Modifier.width(14.dp))
-        Column(Modifier.weight(1f)) {
-            BasicText(
-                "${recipe.instrument.label} · ${recipe.name}",
-                style = Type.small.copy(color = Palette.chalk, fontWeight = FontWeight.Medium),
-            )
-            BasicText(line, style = Type.small.copy(color = Palette.chalkSoft), maxLines = 1)
+                .background(background)
+                .border(1.dp, border, CircleShape)
+                .padding(horizontal = 12.dp, vertical = 5.dp),
+        ) {
+            Text(reading, style = Type.time.copy(color = content, fontSize = 17.sp))
         }
-        BasicText(aside, style = Type.mono.copy(color = if (status.phase == Phase.READY) recipe.color else Palette.chalkSoft, fontSize = 12.sp))
     }
 }

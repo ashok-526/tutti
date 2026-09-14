@@ -1,295 +1,217 @@
 package app.tutti.ui
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.drawText
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import app.tutti.schedule.Score
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 
-private val CLOCK = DateTimeFormatter.ofPattern("h:mm a")
-fun clockTime(secondsFromNow: Int): String = LocalTime.now().plusSeconds(secondsFromNow.toLong()).format(CLOCK)
-fun minutesLabel(seconds: Int) = "${(seconds + 59) / 60} min"
+/** Material Symbols glyphs (Apache 2.0), from Google's published path data. */
+object Glyphs {
+    private fun glyph(name: String, pathData: String): ImageVector =
+        ImageVector.Builder(name = name, defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f)
+            .addPath(pathData = PathParser().parsePathString(pathData).toNodes(), fill = SolidColor(Color.Black))
+            .build()
 
-@Composable
-fun Hairline(modifier: Modifier = Modifier, color: Color = Palette.rule) {
-    Box(modifier.fillMaxWidth().height(1.dp).background(color))
+    val Back = glyph("back", "M20,11H7.83l5.59,-5.59L12,4l-8,8 8,8 1.41,-1.41L7.83,13H20v-2z")
+    val Close = glyph("close", "M19,6.41L17.59,5 12,10.59 6.41,5 5,6.41 10.59,12 5,17.59 6.41,19 12,13.41 17.59,19 19,17.59 13.41,12z")
+    val Check = glyph("check", "M9,16.17L4.83,12l-1.42,1.41L9,19 21,7l-1.41,-1.41z")
+    val Add = glyph("add", "M19,13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z")
+    val Play = glyph("play", "M8,5v14l11,-7z")
+    val VolumeOn = glyph(
+        "volume_on",
+        "M3,9v6h4l5,5V4L7,9H3zM16.5,12c0,-1.77 -1.02,-3.29 -2.5,-4.03v8.05c1.48,-0.73 2.5,-2.25 2.5,-4.02zM14,3.23v2.06c2.89,0.86 5,3.54 5,6.71s-2.11,5.85 -5,6.71v2.06c4.01,-0.91 7,-4.49 7,-8.77s-2.99,-7.86 -7,-8.77z",
+    )
+    val VolumeOff = glyph(
+        "volume_off",
+        "M16.5,12c0,-1.77 -1.02,-3.29 -2.5,-4.03v2.21l2.45,2.45c0.03,-0.2 0.05,-0.41 0.05,-0.63zM19,12c0,0.94 -0.2,1.82 -0.54,2.64l1.51,1.51C20.63,14.91 21,13.5 21,12c0,-4.28 -2.99,-7.86 -7,-8.77v2.06c2.89,0.86 5,3.54 5,6.71zM4.27,3L3,4.27 7.73,9H3v6h4l5,5v-6.73l4.25,4.25c-0.67,0.52 -1.42,0.93 -2.25,1.18v2.06c1.38,-0.31 2.63,-0.95 3.69,-1.81L19.73,21 21,19.73l-9,-9L4.27,3zM12,4L9.91,6.09 12,8.18V4z",
+    )
 }
 
 @Composable
-fun Label(text: String, color: Color, modifier: Modifier = Modifier) {
-    BasicText(text.uppercase(), modifier, style = Type.label.copy(color = color))
-}
-
-@Composable
-fun PillButton(
+fun PrimaryButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    container: Color = Palette.ink,
-    content: Color = Palette.paper,
     enabled: Boolean = true,
-    arrow: Boolean = true,
+    signal: Boolean = false,
 ) {
-    Row(
-        modifier
-            .pressable(enabled, onClick)
-            .clip(RoundedCornerShape(50))
-            .background(if (enabled) container else container.copy(alpha = 0.25f))
-            .padding(horizontal = 24.dp, vertical = 17.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
+    val colors = tutti
+    val source = remember { MutableInteractionSource() }
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = modifier.heightIn(min = 56.dp).pressScale(source),
+        shape = CircleShape,
+        interactionSource = source,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (signal) colors.cue else colors.ink,
+            contentColor = if (signal) colors.onCue else colors.onInk,
+            disabledContainerColor = colors.sunken,
+            disabledContentColor = colors.inkMuted,
+        ),
+        contentPadding = PaddingValues(horizontal = 28.dp, vertical = 16.dp),
     ) {
-        BasicText(text, style = Type.body.copy(color = content, fontWeight = FontWeight.Medium, fontSize = 16.sp))
-        if (arrow) {
-            Spacer(Modifier.width(12.dp))
-            ArrowIcon(content)
-        }
+        Text(text, style = Type.button, maxLines = 1)
     }
 }
 
 @Composable
-fun GhostButton(text: String, onClick: () -> Unit, color: Color, modifier: Modifier = Modifier) {
-    Box(
-        modifier
-            .pressable(onClick = onClick)
-            .clip(RoundedCornerShape(50))
-            .border(1.dp, color.copy(alpha = 0.35f), RoundedCornerShape(50))
-            .padding(horizontal = 22.dp, vertical = 16.dp),
-        contentAlignment = Alignment.Center,
+fun SecondaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
+    val colors = tutti
+    val source = remember { MutableInteractionSource() }
+    OutlinedButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = modifier.heightIn(min = 56.dp).pressScale(source),
+        shape = CircleShape,
+        interactionSource = source,
+        border = BorderStroke(1.5.dp, if (enabled) colors.ink.copy(alpha = 0.5f) else colors.line),
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.ink, disabledContentColor = colors.inkMuted),
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
     ) {
-        BasicText(text, style = Type.body.copy(color = color, fontWeight = FontWeight.Medium, fontSize = 16.sp))
+        Text(text, style = Type.button, maxLines = 1)
     }
 }
 
 @Composable
-fun ArrowIcon(color: Color, modifier: Modifier = Modifier, back: Boolean = false) {
-    Canvas(modifier.size(18.dp)) {
-        val w = size.width
-        val s = 1.8.dp.toPx()
-        rotate(if (back) 180f else 0f) {
-            drawLine(color, Offset(w * 0.12f, w / 2), Offset(w * 0.88f, w / 2), s, StrokeCap.Round)
-            drawLine(color, Offset(w * 0.58f, w * 0.2f), Offset(w * 0.88f, w / 2), s, StrokeCap.Round)
-            drawLine(color, Offset(w * 0.58f, w * 0.8f), Offset(w * 0.88f, w / 2), s, StrokeCap.Round)
+fun GlyphButton(glyph: ImageVector, description: String, onClick: () -> Unit, modifier: Modifier = Modifier, tint: Color = tutti.ink) {
+    IconButton(onClick = onClick, modifier = modifier.size(48.dp)) {
+        Icon(glyph, contentDescription = description, tint = tint)
+    }
+}
+
+/** A dish's identity mark: its printed record label, spindle hole and all. */
+@Composable
+fun LabelMark(color: Color, modifier: Modifier = Modifier, size: Dp = 18.dp) {
+    val hole = tutti.plinth
+    Canvas(modifier.size(size)) {
+        drawCircle(color)
+        drawCircle(hole, radius = this.size.minDimension * 0.13f)
+    }
+}
+
+/**
+ * A dish in the crate: a square sleeve printed in its label ink. Choosing it slides the record
+ * half out of the sleeve, turning as it goes.
+ */
+@Composable
+fun Sleeve(color: Color, chosen: Boolean, modifier: Modifier = Modifier) {
+    val colors = tutti
+    val out by animateFloatAsState(
+        targetValue = if (chosen) 1f else 0f,
+        animationSpec = spring(dampingRatio = 0.8f, stiffness = 380f),
+        label = "sleeve",
+    )
+    Box(modifier.size(width = 84.dp, height = 60.dp)) {
+        Canvas(
+            Modifier
+                .size(54.dp)
+                .align(Alignment.CenterStart)
+                .offset(x = 3.dp)
+                .graphicsLayer {
+                    translationX = (26 * out).dp.toPx()
+                    rotationZ = 70f * out
+                },
+        ) {
+            val r = size.minDimension / 2f
+            drawCircle(colors.vinyl, r)
+            drawCircle(colors.groove, r * 0.8f, style = Stroke(0.8.dp.toPx()))
+            drawCircle(colors.groove, r * 0.62f, style = Stroke(0.8.dp.toPx()))
+            drawCircle(color, r * 0.36f)
+            drawLine(colors.label.copy(alpha = 0.7f), center + Offset(0f, -r * 0.3f), center + Offset(0f, -r * 0.12f), 1.5.dp.toPx(), StrokeCap.Round)
+            drawCircle(colors.plinth, r * 0.06f)
         }
-    }
-}
-
-@Composable
-fun CloseIcon(color: Color, modifier: Modifier = Modifier) {
-    Canvas(modifier.size(18.dp)) {
-        val w = size.width
-        val s = 1.8.dp.toPx()
-        drawLine(color, Offset(w * 0.2f, w * 0.2f), Offset(w * 0.8f, w * 0.8f), s, StrokeCap.Round)
-        drawLine(color, Offset(w * 0.8f, w * 0.2f), Offset(w * 0.2f, w * 0.8f), s, StrokeCap.Round)
-    }
-}
-
-@Composable
-fun PlusCheckIcon(color: Color, checked: Boolean, modifier: Modifier = Modifier) {
-    Canvas(modifier.size(16.dp)) {
-        val w = size.width
-        val s = 1.8.dp.toPx()
-        if (checked) {
-            drawLine(color, Offset(w * 0.15f, w * 0.52f), Offset(w * 0.4f, w * 0.78f), s, StrokeCap.Round)
-            drawLine(color, Offset(w * 0.4f, w * 0.78f), Offset(w * 0.86f, w * 0.24f), s, StrokeCap.Round)
-        } else {
-            drawLine(color, Offset(w / 2, w * 0.15f), Offset(w / 2, w * 0.85f), s, StrokeCap.Round)
-            drawLine(color, Offset(w * 0.15f, w / 2), Offset(w * 0.85f, w / 2), s, StrokeCap.Round)
-        }
-    }
-}
-
-@Composable
-fun SpeakerIcon(color: Color, muted: Boolean, modifier: Modifier = Modifier) {
-    Canvas(modifier.size(20.dp)) {
-        val w = size.width
-        val s = 1.6.dp.toPx()
-        val body = androidx.compose.ui.graphics.Path().apply {
-            moveTo(w * 0.1f, w * 0.38f); lineTo(w * 0.3f, w * 0.38f); lineTo(w * 0.52f, w * 0.18f)
-            lineTo(w * 0.52f, w * 0.82f); lineTo(w * 0.3f, w * 0.62f); lineTo(w * 0.1f, w * 0.62f); close()
-        }
-        drawPath(body, color)
-        if (muted) {
-            drawLine(color, Offset(w * 0.66f, w * 0.38f), Offset(w * 0.9f, w * 0.62f), s, StrokeCap.Round)
-            drawLine(color, Offset(w * 0.9f, w * 0.38f), Offset(w * 0.66f, w * 0.62f), s, StrokeCap.Round)
-        } else {
-            drawArc(color, -45f, 90f, false, Offset(w * 0.36f, w * 0.3f), Size(w * 0.4f, w * 0.4f), style = Stroke(s, cap = StrokeCap.Round))
-            drawArc(color, -45f, 90f, false, Offset(w * 0.26f, w * 0.14f), Size(w * 0.72f, w * 0.72f), style = Stroke(s, cap = StrokeCap.Round))
-        }
-    }
-}
-
-/** A dish's leitmotif, engraved on a tiny five-line staff. */
-@Composable
-fun MotifStaff(
-    motif: List<Int>,
-    color: Color,
-    lineColor: Color,
-    modifier: Modifier = Modifier,
-    highlight: Int = -1,
-) {
-    Canvas(modifier.size(76.dp, 30.dp)) {
-        val gap = size.height / 6f
-        for (i in 1..5) drawLine(lineColor, Offset(0f, gap * i), Offset(size.width, gap * i), 1.dp.toPx())
-        val headW = gap * 1.4f
-        val headH = gap * 0.98f
-        val spacing = (size.width - headW * 2.2f) / (motif.size - 1).coerceAtLeast(1)
-        motif.forEachIndexed { i, p ->
-            val degree = intArrayOf(0, 1, 2, 4, 5)[p % 5] + 7 * (p / 5)
-            val x = headW * 1.1f + spacing * i
-            val y = gap * 5.5f - degree * gap / 2f
-            val scale = if (i == highlight) 1.35f else 1f
-            val c = if (highlight >= 0 && i != highlight) color.copy(alpha = 0.45f) else color
-            rotate(-22f, Offset(x, y)) {
-                drawOval(c, Offset(x - headW * scale / 2, y - headH * scale / 2), Size(headW * scale, headH * scale))
+        Box(
+            Modifier
+                .size(60.dp)
+                .shadow(if (chosen) 6.dp else 1.dp, RoundedCornerShape(4.dp), clip = false)
+                .clip(RoundedCornerShape(4.dp))
+                .background(color),
+        ) {
+            Canvas(Modifier.size(60.dp)) {
+                drawCircle(Color.Black.copy(alpha = 0.16f), size.minDimension * 0.19f)
+                drawCircle(Color.White.copy(alpha = 0.22f), size.minDimension * 0.19f, style = Stroke(1.dp.toPx()))
             }
-            val stemX = x + headW * scale / 2 - 0.6.dp.toPx()
-            drawLine(c, Offset(stemX, y - 1f), Offset(stemX, y - gap * 2.7f), 1.2.dp.toPx())
+        }
+    }
+}
+
+/** A leitmotif as a pitch contour: four notes, rising and falling. */
+@Composable
+fun MotifContour(motif: List<Int>, color: Color, modifier: Modifier = Modifier, lit: Int = -1) {
+    Canvas(modifier.size(width = 56.dp, height = 28.dp)) {
+        val count = motif.size
+        val xs = List(count) { i -> size.width * (0.1f + 0.8f * i / (count - 1).coerceAtLeast(1)) }
+        val ys = motif.map { p -> size.height * (0.84f - 0.68f * (p / 9f)) }
+        for (i in 0 until count - 1) {
+            drawLine(color.copy(alpha = 0.45f), Offset(xs[i], ys[i]), Offset(xs[i + 1], ys[i + 1]), 1.6.dp.toPx(), StrokeCap.Round)
+        }
+        for (i in 0 until count) {
+            val radius = if (i == lit) 5.dp.toPx() else 3.4.dp.toPx()
+            drawCircle(color, radius, Offset(xs[i], ys[i]))
         }
     }
 }
 
 /**
- * The score: one staff per dish, blocks for steps (solid = your hands, hatched = the heat),
- * a lane proving you never hold two tasks at once, and a double bar where every dish lands.
+ * A small printed chip, like the speed selector on a deck. [cue] is the amber light:
+ * reserved for "your hands, now".
  */
 @Composable
-fun ScoreTimeline(
-    score: Score,
-    modifier: Modifier = Modifier,
-    now: Float? = null,
-    dark: Boolean = false,
-    rowHeight: Dp = 36.dp,
-    showAxis: Boolean = true,
-    showLane: Boolean = true,
-) {
-    val measurer = rememberTextMeasurer()
-    val ink = if (dark) Palette.chalk else Palette.ink
-    val faint = if (dark) Palette.stageLine else Palette.rule
-    val soft = if (dark) Palette.chalkSoft else Palette.inkSoft
-    val accent = if (dark) Palette.batonLit else Palette.baton
-    val ground = if (dark) Palette.stage else Palette.paper
-    val rows = score.recipes.size
-    val axisH = if (showAxis) 22.dp else 4.dp
-    val laneH = if (showLane) 28.dp else 0.dp
-
-    val description = remember(score) {
-        buildString {
-            append("Score for ${score.recipes.size} dishes: ${(score.tutti + 59) / 60} minutes to the final chord, ")
-            append("${(score.handsOnSeconds + 59) / 60} minutes hands-on, never two tasks at once. ")
-            score.recipes.forEachIndexed { d, recipe ->
-                append("${recipe.name} on ${recipe.instrument.label.lowercase()}, ${score.slotsFor(d).size} steps. ")
-            }
-        }
-    }
-    Canvas(modifier.fillMaxWidth().height(axisH + rowHeight * rows + laneH).semantics { contentDescription = description }) {
-        val gutter = 26.dp.toPx()
-        val right = size.width - 6.dp.toPx()
-        val total = maxOf(score.tutti, score.slots.maxOfOrNull { it.end } ?: 1).toFloat().coerceAtLeast(60f)
-        fun x(t: Float) = gutter + (right - gutter) * (t / total)
-        val top = axisH.toPx()
-        val rh = rowHeight.toPx()
-        val bottom = top + rh * rows + laneH.toPx()
-        val tickStyle = TextStyle(fontFamily = Fonts.mono, fontSize = 9.sp, color = soft)
-
-        if (showAxis) {
-            val every = if (total > 3000) 10 else 5
-            var m = 0
-            while (m * 60 <= total) {
-                val xx = x(m * 60f)
-                drawLine(faint, Offset(xx, top - 3.dp.toPx()), Offset(xx, bottom), 1f,
-                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(3f, 6f)))
-                if (x(total) - xx > 44.dp.toPx()) drawText(measurer, "$m′", Offset(xx + 3.dp.toPx(), 0f), tickStyle)
-                m += every
-            }
-        }
-
-        score.recipes.forEachIndexed { d, recipe ->
-            val cy = top + rh * d + rh / 2
-            drawLine(faint, Offset(gutter, cy), Offset(right, cy), 1f)
-            drawText(measurer, roman(d), Offset(0f, cy - 10.dp.toPx()),
-                TextStyle(fontFamily = Fonts.serif, fontSize = 16.sp, color = recipe.color))
-            for (slot in score.slotsFor(d)) {
-                val step = recipe.steps[slot.step]
-                val x0 = x(slot.start.toFloat())
-                val x1 = maxOf(x(slot.end.toFloat()), x0 + 2.dp.toPx())
-                if (step.handsOn) {
-                    val h = rh * 0.5f
-                    drawRoundRect(recipe.color, Offset(x0, cy - h / 2), Size(x1 - x0, h), CornerRadius(3.dp.toPx()))
-                } else {
-                    val h = rh * 0.32f
-                    drawRoundRect(recipe.color.copy(alpha = 0.2f), Offset(x0, cy - h / 2), Size(x1 - x0, h), CornerRadius(2.dp.toPx()))
-                    clipRect(x0, cy - h / 2, x1, cy + h / 2) {
-                        var hx = x0 - h
-                        while (hx < x1) {
-                            drawLine(recipe.color.copy(alpha = 0.7f), Offset(hx, cy + h / 2), Offset(hx + h, cy - h / 2), 1.dp.toPx())
-                            hx += 4.dp.toPx()
-                        }
-                    }
-                }
-            }
-        }
-
-        if (showLane) {
-            val ly = top + rh * rows + laneH.toPx() / 2
-            drawText(measurer, "you", Offset(0f, ly - 7.dp.toPx()), tickStyle)
-            drawLine(faint, Offset(gutter, ly), Offset(right, ly), 1f)
-            for (slot in score.slots) {
-                if (!score.stepOf(slot).handsOn) continue
-                val x0 = x(slot.start.toFloat())
-                drawRoundRect(score.recipes[slot.dish].color, Offset(x0, ly - 4.dp.toPx()),
-                    Size(maxOf(x(slot.end.toFloat()) - x0, 3.dp.toPx()), 8.dp.toPx()), CornerRadius(4.dp.toPx()))
-            }
-        }
-
-        if (now != null) {
-            val px = x(now.coerceIn(0f, total))
-            drawRect(ground.copy(alpha = 0.55f), Offset(gutter, top - 3.dp.toPx()), Size(px - gutter, bottom - top + 3.dp.toPx()))
-            drawLine(accent, Offset(px, top - 4.dp.toPx()), Offset(px, bottom), 2.dp.toPx())
-            drawCircle(accent, 3.5.dp.toPx(), Offset(px, top - 4.dp.toPx()))
-        }
-
-        val tx = x(score.tutti.toFloat())
-        drawLine(ink, Offset(tx - 4.dp.toPx(), top - 2.dp.toPx()), Offset(tx - 4.dp.toPx(), bottom), 1.dp.toPx())
-        drawLine(ink, Offset(tx, top - 2.dp.toPx()), Offset(tx, bottom), 3.dp.toPx())
-        if (showAxis) {
-            val layout = measurer.measure("TUTTI", TextStyle(fontFamily = Fonts.mono, fontWeight = FontWeight.Medium, fontSize = 9.sp, color = accent))
-            drawText(layout, topLeft = Offset(tx - layout.size.width - 2.dp.toPx(), 0f))
-        }
+fun Tag(text: String, modifier: Modifier = Modifier, emphasis: Boolean = false, cue: Boolean = false) {
+    val colors = tutti
+    Box(
+        modifier
+            .clip(CircleShape)
+            .background(if (cue) colors.cue else colors.sunken)
+            .border(1.dp, if (cue) colors.cueEdge else Color.Transparent, CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text.uppercase(),
+            style = Type.label.copy(
+                color = when {
+                    cue -> colors.onCue
+                    emphasis -> colors.ink
+                    else -> colors.inkMuted
+                },
+            ),
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+            maxLines = 1,
+        )
     }
 }

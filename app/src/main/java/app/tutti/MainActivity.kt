@@ -11,18 +11,26 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import app.tutti.session.Screen
 import app.tutti.session.TuttiState
 import app.tutti.ui.ConductScreen
 import app.tutti.ui.FinaleScreen
+import app.tutti.ui.Motion
 import app.tutti.ui.ProgrammeScreen
 import app.tutti.ui.ScoreScreen
+import app.tutti.ui.TuttiTheme
+import app.tutti.ui.animationsEnabled
+import app.tutti.ui.tutti
 
 class MainActivity : ComponentActivity() {
     private lateinit var state: TuttiState
@@ -38,7 +46,7 @@ class MainActivity : ComponentActivity() {
             Log.i("Tutti", "session-recording-start ${System.currentTimeMillis()}")
         }
         state.orchestra.start()
-        setContent { TuttiApp(state) }
+        setContent { TuttiTheme { TuttiApp(state) } }
     }
 
     override fun onDestroy() {
@@ -50,12 +58,14 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun TuttiApp(state: TuttiState) {
     val view = LocalView.current
+    val colors = tutti
     val onStage = state.screen == Screen.CONDUCT
+    val motion = animationsEnabled()
     SideEffect {
         val window = (view.context as Activity).window
         WindowCompat.getInsetsController(window, view).apply {
-            isAppearanceLightStatusBars = !onStage
-            isAppearanceLightNavigationBars = !onStage
+            isAppearanceLightStatusBars = !colors.dark
+            isAppearanceLightNavigationBars = !colors.dark
         }
     }
     DisposableEffect(onStage) {
@@ -66,7 +76,16 @@ fun TuttiApp(state: TuttiState) {
 
     AnimatedContent(
         targetState = state.screen,
-        transitionSpec = { fadeIn(tween(520, delayMillis = 80)) togetherWith fadeOut(tween(260)) },
+        modifier = Modifier.fillMaxSize().background(colors.plinth),
+        transitionSpec = {
+            if (motion) {
+                (fadeIn(tween(240, delayMillis = 80, easing = Motion.out)) +
+                    scaleIn(tween(280, delayMillis = 80, easing = Motion.out), initialScale = 0.97f)) togetherWith
+                    fadeOut(tween(90))
+            } else {
+                fadeIn(tween(0)) togetherWith fadeOut(tween(0))
+            }
+        },
         label = "screen",
     ) { screen ->
         when (screen) {
