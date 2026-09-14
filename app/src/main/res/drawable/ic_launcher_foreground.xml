@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A fermata: the conductor's "hold" — every dish waits for the final chord. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:pathData="M33,66 A21,21 0 0,1 75,66"
+        android:strokeWidth="6.5"
+        android:strokeColor="#F3EDE2"
+        android:strokeLineCap="round" />
+    <path
+        android:fillColor="#E0553A"
+        android:pathData="M54,54.5m-5.5,0a5.5,5.5 0,1 1,11 0a5.5,5.5 0,1 1,-11 0" />
+</vector>
