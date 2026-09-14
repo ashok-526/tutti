@@ -46,6 +46,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -110,7 +116,11 @@ fun ConductScreen(state: TuttiState, performance: Performance) {
     ) {
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(44.dp).pressable { state.back() }, contentAlignment = Alignment.Center) {
+                Box(
+                    Modifier.size(44.dp).pressable { state.back() }
+                        .semantics { contentDescription = "Stop the performance"; role = Role.Button },
+                    contentAlignment = Alignment.Center,
+                ) {
                     CloseIcon(Palette.chalkSoft)
                 }
                 Spacer(Modifier.weight(1f))
@@ -126,6 +136,9 @@ fun ConductScreen(state: TuttiState, performance: Performance) {
                     Modifier.size(44.dp).pressable {
                         muted = !muted
                         state.orchestra.muted = muted
+                    }.semantics {
+                        contentDescription = if (muted) "Unmute the orchestra" else "Mute the orchestra"
+                        role = Role.Button
                     },
                     contentAlignment = Alignment.Center,
                 ) { SpeakerIcon(Palette.chalkSoft, muted) }
@@ -231,6 +244,7 @@ fun ConductScreen(state: TuttiState, performance: Performance) {
                 shownNotice ?: "",
                 style = Type.small.copy(color = Palette.stage, fontWeight = FontWeight.Medium),
                 modifier = Modifier
+                    .semantics { liveRegion = LiveRegionMode.Polite }
                     .clip(RoundedCornerShape(50))
                     .background(Palette.chalk)
                     .padding(horizontal = 18.dp, vertical = 10.dp),
@@ -289,7 +303,11 @@ private fun HandsPanel(score: Score, slot: Slot, now: Float, beat: () -> Double)
             Label("Your hands · ${recipe.instrument.label}", Palette.chalkSoft)
         }
         Spacer(Modifier.height(12.dp))
-        BasicText(step.title, style = Type.title.copy(fontSize = 44.sp, lineHeight = 46.sp, color = Palette.chalk))
+        BasicText(
+            step.title,
+            style = Type.title.copy(fontSize = 44.sp, lineHeight = 46.sp, color = Palette.chalk),
+            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+        )
         Spacer(Modifier.height(8.dp))
         BasicText(step.detail, style = Type.body.copy(color = Palette.chalkSoft, fontSize = 16.sp))
         Spacer(Modifier.height(20.dp))
@@ -314,7 +332,7 @@ private fun FreePanel(performance: Performance, now: Float) {
     val score = performance.score
     val next = score.cues.firstOrNull { it.start > now && score.stepOf(it).handsOn }
     Column(Modifier.padding(horizontal = 24.dp)) {
-        Label("Your hands are free", Palette.chalkSoft)
+        Label("Your hands are free", Palette.chalkSoft, Modifier.semantics { liveRegion = LiveRegionMode.Polite })
         Spacer(Modifier.height(12.dp))
         if (next != null) {
             val recipe = score.recipes[next.dish]

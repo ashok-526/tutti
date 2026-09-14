@@ -31,6 +31,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -134,7 +137,12 @@ private fun MovementRow(recipe: Recipe, index: Int, onToggle: () -> Unit) {
     val bar by animateDpAsState(if (chosen) 4.dp else 0.dp, spring(dampingRatio = 0.7f, stiffness = 500f), label = "bar")
     val nameColor by animateColorAsState(if (chosen) Palette.ink else Palette.inkFaint, label = "name")
 
-    Column(Modifier.pressable(onClick = onToggle)) {
+    Column(
+        Modifier.pressable(onClick = onToggle).semantics {
+            selected = chosen
+            stateDescription = if (chosen) "Movement ${roman(index)} of tonight's programme" else "Not in the programme"
+        },
+    ) {
         Row(
             Modifier.fillMaxWidth().height(96.dp).padding(end = 24.dp),
             verticalAlignment = Alignment.CenterVertically,

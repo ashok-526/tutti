@@ -33,6 +33,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -61,7 +66,11 @@ fun ScoreScreen(state: TuttiState) {
     Box(Modifier.fillMaxSize().background(Palette.paper)) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).statusBarsPadding()) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(44.dp).pressable { state.back() }, contentAlignment = Alignment.Center) {
+                Box(
+                    Modifier.size(44.dp).pressable { state.back() }
+                        .semantics { contentDescription = "Back to the programme"; role = Role.Button },
+                    contentAlignment = Alignment.Center,
+                ) {
                     ArrowIcon(Palette.ink, back = true)
                 }
                 Spacer(Modifier.weight(1f))
@@ -181,7 +190,16 @@ private fun SectionTitle(title: String, aside: String) {
 @Composable
 private fun RehearsalToggle(on: Boolean, onToggle: () -> Unit) {
     val knob by animateDpAsState(if (on) 16.dp else 2.dp, spring(dampingRatio = 0.6f, stiffness = 700f), label = "knob")
-    Row(Modifier.pressable(onClick = onToggle).padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        Modifier
+            .pressable(onClick = onToggle)
+            .semantics {
+                role = Role.Switch
+                stateDescription = if (on) "On, 20 times speed" else "Off, real time"
+            }
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         Box(
             Modifier
                 .size(34.dp, 20.dp)

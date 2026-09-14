@@ -15,6 +15,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -205,7 +208,16 @@ fun ScoreTimeline(
     val axisH = if (showAxis) 22.dp else 4.dp
     val laneH = if (showLane) 28.dp else 0.dp
 
-    Canvas(modifier.fillMaxWidth().height(axisH + rowHeight * rows + laneH)) {
+    val description = remember(score) {
+        buildString {
+            append("Score for ${score.recipes.size} dishes: ${(score.tutti + 59) / 60} minutes to the final chord, ")
+            append("${(score.handsOnSeconds + 59) / 60} minutes hands-on, never two tasks at once. ")
+            score.recipes.forEachIndexed { d, recipe ->
+                append("${recipe.name} on ${recipe.instrument.label.lowercase()}, ${score.slotsFor(d).size} steps. ")
+            }
+        }
+    }
+    Canvas(modifier.fillMaxWidth().height(axisH + rowHeight * rows + laneH).semantics { contentDescription = description }) {
         val gutter = 26.dp.toPx()
         val right = size.width - 6.dp.toPx()
         val total = maxOf(score.tutti, score.slots.maxOfOrNull { it.end } ?: 1).toFloat().coerceAtLeast(60f)
