@@ -73,7 +73,7 @@ The encore turns tonight's dinner into a short piece, with each leitmotif enteri
 
 ## Slide 12 · Close
 **When you hear *tutti*, you serve.**
-GitHub: `<your repo link>`
+GitHub: github.com/ashok-526/tutti
 
 ---
 
