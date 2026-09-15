@@ -8,6 +8,8 @@ mkdir -p "$OUT" "$S"
 tap() { $ADB shell input tap "$1" "$2"; }
 nap() { $ADB shell sleep "$1"; }
 
+$ADB wait-for-device
+$ADB shell echo device-ready
 $ADB shell am force-stop app.tutti
 $ADB shell rm -f /sdcard/tutti_demo.mp4 /sdcard/Android/data/app.tutti/files/session.wav
 $ADB logcat -c
@@ -16,9 +18,9 @@ bash "$UI" wait "Press the record" 60
 nap 2
 
 REC_START=$($ADB shell date +%s%3N)
-# 720p keeps the emulator's encoder from starving the audio thread.
-$ADB shell screenrecord --size 720x1600 --bit-rate 4000000 --time-limit 180 /sdcard/tutti_demo.mp4 &
-REC_PID=$!
+# Detached on the device, so an adb hiccup can't end the take early. 720p keeps the encoder light.
+$ADB shell "nohup screenrecord --size 720x1600 --bit-rate 4000000 --time-limit 180 /sdcard/tutti_demo.mp4 >/dev/null 2>&1 &"
+until $ADB shell ls /sdcard/tutti_demo.mp4 >/dev/null 2>&1; do nap 0.3; done
 nap 2.5
 $ADB shell input swipe 540 1700 540 1250 450
 nap 1.4
@@ -43,7 +45,7 @@ nap 1.0
 bash "$UI" tap "Play the encore" || tap 540 2100
 nap 13
 $ADB shell pkill -INT screenrecord
-wait $REC_PID
+while $ADB shell pidof screenrecord >/dev/null 2>&1; do nap 0.5; done
 nap 2
 
 $ADB pull /sdcard/tutti_demo.mp4 "$S/demo_raw.mp4" | tail -1

@@ -201,7 +201,10 @@ class Orchestra {
                 stopRecording = false
             }
 
-            track?.write(interleaved, 0, frames * 2, AudioTrack.WRITE_BLOCKING)
+            // Music follows the wall clock. If the sink (or an overloaded device) falls behind real time,
+            // keep rendering for the timeline and the recording, but skip playback until caught up.
+            val behindMs = (System.nanoTime() - startNs) / 1_000_000 - written * 1000 / SR
+            if (behindMs < 120) track?.write(interleaved, 0, frames * 2, AudioTrack.WRITE_BLOCKING)
             written += frames
             // Keep real time even when the audio sink doesn't block (e.g. a silent emulator).
             val aheadMs = written * 1000 / SR - (System.nanoTime() - startNs) / 1_000_000 - 80
