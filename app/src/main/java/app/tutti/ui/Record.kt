@@ -10,29 +10,36 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.lerp
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.res.ResourcesCompat
 import app.tutti.R
 import app.tutti.schedule.Score
 import kotlin.math.abs
+import kotlin.math.ceil
 import kotlin.math.cos
+import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.math.sqrt
 
@@ -54,6 +61,14 @@ fun grooveRadius(fraction: Float, radius: Float): Float {
 
 /** What's printed on the record's label. [main] stays upright while the disc turns. */
 data class DiscLabel(val top: String = "", val main: String = "", val sub: String = "", val bottom: String = "")
+
+/** The pressed vinyl (grooves and bands) only changes when the score does, so it is drawn once and turned. */
+private class Pressing {
+    var score: Score? = null
+    var size = 0
+    var colors: TuttiColors? = null
+    var image: ImageBitmap? = null
+}
 
 /**
  * The record. Each dish owns a slice of the disc; its steps are pressed as bands from the rim
@@ -80,6 +95,7 @@ fun Turntable(
     val colors = tutti
     val context = LocalContext.current
     val measurer = rememberTextMeasurer()
+    val pressing = remember { Pressing() }
     val curvedPaint = remember {
         android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
             typeface = ResourcesCompat.getFont(context, R.font.archivo)
@@ -96,12 +112,18 @@ fun Turntable(
         val spin = rotation()
 
         strobe?.let { drawPlatter(c, r, spin, it(), colors) }
-        drawCircle(Color.Black.copy(alpha = if (colors.dark) 0.55f else 0.2f), r * 1.01f, c + Offset(0f, r * 0.035f))
-        drawCircle(colors.vinyl, r, c)
+        drawSoftShadow(c + Offset(0f, r * 0.04f), r * 1.12f, if (colors.dark) 0.6f else 0.22f)
 
+        val disc = pressed(pressing, score, r, total, colors)
         rotate(spin, c) {
-            drawGrooves(c, r, colors)
-            if (score != null) drawBands(score, c, r, total, flashDish, flash())
+            drawImage(
+                disc,
+                dstOffset = IntOffset((c.x - disc.width / 2f).roundToInt(), (c.y - disc.height / 2f).roundToInt()),
+                dstSize = IntSize(disc.width, disc.height),
+                filterQuality = FilterQuality.Medium,
+            )
+            val amount = flash()
+            if (score != null && flashDish in score.recipes.indices && amount > 0f) drawFlash(score, c, r, flashDish, amount)
         }
         nowValue?.let { dimPlayed(c, r, grooveRadius(it / total, r), colors) }
         drawSheen(c, r)
@@ -111,6 +133,39 @@ fun Turntable(
         drawLabel(c, r, spin, label, labelPaper ?: colors.label, colors, curvedPaint, measurer)
         arm?.let { drawTonearm(c, r, grooveRadius(it(), r), colors, cueLit(), armDrop().coerceIn(0f, 1f)) }
     }
+}
+
+private fun DrawScope.pressed(pressing: Pressing, score: Score?, r: Float, total: Float, colors: TuttiColors): ImageBitmap {
+    val px = ceil(r * 2f).toInt().coerceAtLeast(2)
+    val cached = pressing.image
+    if (cached != null && pressing.score === score && pressing.size == px && pressing.colors == colors) return cached
+    val image = ImageBitmap(px, px)
+    CanvasDrawScope().draw(this, layoutDirection, androidx.compose.ui.graphics.Canvas(image), Size(px.toFloat(), px.toFloat())) {
+        val cc = Offset(px / 2f, px / 2f)
+        drawCircle(colors.vinyl, r, cc)
+        drawGrooves(cc, r, colors)
+        if (score != null) drawBands(score, cc, r, total)
+    }
+    pressing.image = image
+    pressing.score = score
+    pressing.size = px
+    pressing.colors = colors
+    return image
+}
+
+/** A shadow with a real falloff: solid under the object, fading past its edge. */
+private fun DrawScope.drawSoftShadow(center: Offset, radius: Float, alpha: Float) {
+    drawCircle(
+        brush = Brush.radialGradient(
+            0f to Color.Black.copy(alpha = alpha),
+            0.8f to Color.Black.copy(alpha = alpha),
+            1f to Color.Transparent,
+            center = center,
+            radius = radius,
+        ),
+        radius = radius,
+        center = center,
+    )
 }
 
 private fun sector(c: Offset, outer: Float, inner: Float, start: Float, sweep: Float) = Path().apply {
@@ -132,7 +187,7 @@ private fun DrawScope.drawGrooves(c: Offset, r: Float, colors: TuttiColors) {
     drawCircle(colors.rim, r - 0.5.dp.toPx(), c, style = Stroke(1.dp.toPx()))
 }
 
-private fun DrawScope.drawBands(score: Score, c: Offset, r: Float, total: Float, flashDish: Int, flash: Float) {
+private fun DrawScope.drawBands(score: Score, c: Offset, r: Float, total: Float) {
     val n = score.recipes.size
     val gap = if (n > 1) 4f else 0f
     val span = 360f / n
@@ -156,10 +211,13 @@ private fun DrawScope.drawBands(score: Score, c: Offset, r: Float, total: Float,
             }
         }
     }
-    if (flashDish in 0 until n && flash > 0f) {
-        val start = -90f + flashDish * span + gap / 2f
-        drawPath(sector(c, r * OUTER, r * INNER, start, span - gap), Color.White.copy(alpha = 0.3f * flash))
-    }
+}
+
+private fun DrawScope.drawFlash(score: Score, c: Offset, r: Float, dish: Int, amount: Float) {
+    val n = score.recipes.size
+    val gap = if (n > 1) 4f else 0f
+    val span = 360f / n
+    drawPath(sector(c, r * OUTER, r * INNER, -90f + dish * span + gap / 2f, span - gap), Color.White.copy(alpha = 0.3f * amount))
 }
 
 private fun DrawScope.dimPlayed(c: Offset, r: Float, rNow: Float, colors: TuttiColors) {
@@ -193,16 +251,16 @@ private fun DrawScope.drawSheen(c: Offset, r: Float) {
 
 /** The platter rim's strobe dots: they pulse on every beat. */
 private fun DrawScope.drawPlatter(c: Offset, r: Float, spin: Float, pulse: Float, colors: TuttiColors) {
-    drawCircle(colors.sunken, r * 1.075f, c)
-    drawCircle(colors.line, r * 1.075f, c, style = Stroke(1.dp.toPx()))
-    val dots = 60
-    val ring = r * 1.04f
-    val dot = 1.4.dp.toPx()
+    drawCircle(colors.sunken, r * 1.08f, c)
+    drawCircle(colors.line, r * 1.08f, c, style = Stroke(1.dp.toPx()))
+    val dots = 48
+    val ring = r * 1.045f
+    val dot = 2.dp.toPx()
     for (i in 0 until dots) {
         val a = Math.toRadians((spin + i * 360f / dots).toDouble())
         val lit = i % 2 == 0
-        val color = if (lit) colors.ink.copy(alpha = 0.22f + 0.7f * pulse) else colors.ink.copy(alpha = 0.16f)
-        drawCircle(color, dot, Offset(c.x + ring * cos(a).toFloat(), c.y + ring * sin(a).toFloat()))
+        val color = if (lit) colors.ink.copy(alpha = 0.3f + 0.7f * pulse) else colors.ink.copy(alpha = 0.18f)
+        drawCircle(color, if (lit) dot * (1f + 0.35f * pulse) else dot * 0.8f, Offset(c.x + ring * cos(a).toFloat(), c.y + ring * sin(a).toFloat()))
     }
 }
 
@@ -218,10 +276,12 @@ private fun DrawScope.drawLabel(
 ) {
     val rl = r * LABEL
     val ink = if (paper.luminance() > 0.5f) Color(0xFF15171A) else Color(0xFFF6F7F8)
+    // Small caps on a dark ink label need every bit of contrast they can get.
+    val soft = ink.copy(alpha = if (paper.luminance() > 0.5f) 0.78f else 1f)
     rotate(spin, c) {
         drawCircle(paper, rl, c)
         drawCircle(Color.Black.copy(alpha = 0.14f), rl, c, style = Stroke(1.dp.toPx()))
-        paint.color = ink.copy(alpha = 0.78f).toArgb()
+        paint.color = soft.toArgb()
         paint.textSize = (rl * 0.12f).coerceIn(7.sp.toPx(), 12.sp.toPx())
         drawIntoCanvas { canvas ->
             if (label.top.isNotEmpty()) curved(canvas.nativeCanvas, label.top, c, rl * 0.74f, top = true, paint)
@@ -234,7 +294,7 @@ private fun DrawScope.drawLabel(
         val main = measurer.measure(label.main, Type.time.copy(color = ink, fontSize = mainPx.toSp(), lineHeight = mainPx.toSp()))
         val sub = label.sub.takeIf { it.isNotEmpty() }?.let {
             val subPx = minOf(rl * 0.12f, 12.sp.toPx())
-            measurer.measure(it, Type.label.copy(color = ink.copy(alpha = 0.78f), fontSize = subPx.toSp(), lineHeight = (subPx * 1.3f).toSp()))
+            measurer.measure(it, Type.label.copy(color = soft, fontSize = subPx.toSp(), lineHeight = (subPx * 1.3f).toSp()))
         }
         val height = main.size.height + (sub?.size?.height ?: 0)
         val top = c.y - height / 2f
@@ -280,21 +340,17 @@ private fun DrawScope.drawTonearm(c: Offset, r: Float, stylusRadius: Float, colo
     val onRecord = armStylus(c, pivot, stylusRadius, length) ?: rest
     val stylus = lerp(rest, onRecord, drop)
     val dir = (stylus - pivot) / (stylus - pivot).getDistance()
-    val shadow = Offset(3.dp.toPx(), 7.dp.toPx())
-    val shadowColor = Color.Black.copy(alpha = if (colors.dark) 0.45f else 0.18f)
     val head = rotateVector(dir, 24f)
 
-    drawLine(shadowColor, pivot + shadow, stylus + shadow, 7.dp.toPx(), StrokeCap.Round)
-    drawLine(shadowColor, stylus + shadow - head * 4.dp.toPx(), stylus + shadow + head * 15.dp.toPx(), 11.dp.toPx(), StrokeCap.Round)
+    drawSoftShadow(pivot + Offset(2.dp.toPx(), 4.dp.toPx()), 26.dp.toPx(), if (colors.dark) 0.5f else 0.16f)
     drawLine(colors.arm, pivot - dir * (length * 0.1f), pivot - dir * (length * 0.24f), 15.dp.toPx(), StrokeCap.Butt)
     drawLine(colors.arm, pivot, stylus, 5.dp.toPx(), StrokeCap.Round)
     drawLine(colors.armHighlight.copy(alpha = 0.55f), pivot + Offset(-dir.y, dir.x) * 1.dp.toPx(), stylus + Offset(-dir.y, dir.x) * 1.dp.toPx(), 1.dp.toPx(), StrokeCap.Round)
-    drawLine(colors.arm, stylus - head * 4.dp.toPx(), stylus + head * 15.dp.toPx(), 11.dp.toPx(), StrokeCap.Round)
-    val light = stylus + head * 10.dp.toPx()
-    drawCircle(if (cueLit) colors.cue else colors.armHighlight.copy(alpha = 0.4f), 3.6.dp.toPx(), light)
-    if (cueLit) drawCircle(colors.cueEdge, 3.6.dp.toPx(), light, style = Stroke(1.dp.toPx()))
+    drawLine(colors.arm, stylus - head * 4.dp.toPx(), stylus + head * 17.dp.toPx(), 13.dp.toPx(), StrokeCap.Round)
+    val light = stylus + head * 11.dp.toPx()
+    drawCircle(if (cueLit) colors.cue else colors.armHighlight.copy(alpha = 0.4f), 5.dp.toPx(), light)
+    if (cueLit) drawCircle(colors.cueEdge, 5.dp.toPx(), light, style = Stroke(1.2.dp.toPx()))
 
-    drawCircle(shadowColor, 18.dp.toPx(), pivot + shadow)
     drawCircle(colors.surface, 17.dp.toPx(), pivot)
     drawCircle(colors.line, 17.dp.toPx(), pivot, style = Stroke(1.dp.toPx()))
     drawCircle(colors.arm, 6.5.dp.toPx(), pivot)

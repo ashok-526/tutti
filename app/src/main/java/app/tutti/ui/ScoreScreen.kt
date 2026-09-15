@@ -215,5 +215,6 @@ fun ScoreScreen(state: TuttiState) {
                 PrimaryButton("Drop the needle", onClick = { state.raiseBaton() })
             }
         }
+        StatusBarScrim()
     }
 }

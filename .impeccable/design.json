@@ -1,0 +1,982 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-15T02:50:46+00:00",
+  "title": "Design System: Tutti",
+  "extensions": {
+    "platform": {
+      "name": "android",
+      "toolkit": "Jetpack Compose + Material 3",
+      "units": "dp for layout, sp for type",
+      "orientation": "portrait",
+      "themes": [
+        "light",
+        "dark (system)"
+      ],
+      "tokenSource": "app/src/main/java/app/tutti/ui/Theme.kt (TuttiColors, Type, Motion); dish inks in app/src/main/java/app/tutti/model/Recipes.kt"
+    },
+    "colorMeta": {
+      "plinth": {
+        "role": "neutral",
+        "displayName": "Aluminum Plinth",
+        "canonical": "#E3E6E9",
+        "oklch": "oklch(92.3% 0.005 247.9)",
+        "tonalRamp": [
+          "#090B0D",
+          "#232527",
+          "#404245",
+          "#5F6164",
+          "#808385",
+          "#A2A5A8",
+          "#C6C9CC",
+          "#ECEFF2"
+        ],
+        "darkPair": "plinth-dark"
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Brushed Panel",
+        "canonical": "#F0F2F4",
+        "oklch": "oklch(96.0% 0.003 247.9)",
+        "tonalRamp": [
+          "#0A0B0D",
+          "#242527",
+          "#414244",
+          "#606163",
+          "#818284",
+          "#A3A5A7",
+          "#C7C9CB",
+          "#EDEFF1"
+        ],
+        "darkPair": "surface-dark"
+      },
+      "sunken": {
+        "role": "neutral",
+        "displayName": "Recessed Well",
+        "canonical": "#CCD1D6",
+        "oklch": "oklch(85.8% 0.009 247.9)",
+        "tonalRamp": [
+          "#080C0F",
+          "#222529",
+          "#3E4247",
+          "#5D6266",
+          "#7E8387",
+          "#A1A6AA",
+          "#C5CACF",
+          "#EAEFF4"
+        ],
+        "darkPair": "sunken-dark"
+      },
+      "ink": {
+        "role": "primary",
+        "displayName": "Graphite Ink",
+        "canonical": "#15171A",
+        "oklch": "oklch(20.4% 0.007 258.4)",
+        "tonalRamp": [
+          "#090B0E",
+          "#232528",
+          "#404246",
+          "#5F6165",
+          "#808286",
+          "#A2A5A9",
+          "#C6C9CE",
+          "#ECEFF3"
+        ],
+        "darkPair": "ink-dark"
+      },
+      "ink-muted": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "canonical": "#4D535A",
+        "oklch": "oklch(43.9% 0.014 252.2)",
+        "tonalRamp": [
+          "#070C11",
+          "#20262C",
+          "#3D4349",
+          "#5C6269",
+          "#7D838B",
+          "#9FA6AE",
+          "#C3CAD2",
+          "#E8EFF8"
+        ],
+        "darkPair": "ink-muted-dark"
+      },
+      "ink-faint": {
+        "role": "neutral",
+        "displayName": "Faint Ink",
+        "canonical": "#737A82",
+        "oklch": "oklch(57.6% 0.015 251.6)",
+        "tonalRamp": [
+          "#070C11",
+          "#20262C",
+          "#3C434A",
+          "#5B626A",
+          "#7C838B",
+          "#9EA6AE",
+          "#C2CAD3",
+          "#E7EFF8"
+        ],
+        "darkPair": "ink-faint-dark"
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#C3C9CF",
+        "oklch": "oklch(83.3% 0.011 248.0)",
+        "tonalRamp": [
+          "#080C0F",
+          "#21262A",
+          "#3E4348",
+          "#5D6267",
+          "#7D8389",
+          "#A0A6AC",
+          "#C4CAD0",
+          "#E9EFF5"
+        ],
+        "darkPair": "line-dark"
+      },
+      "on-ink": {
+        "role": "neutral",
+        "displayName": "On Ink",
+        "canonical": "#F0F2F4",
+        "oklch": "oklch(96.0% 0.003 247.9)",
+        "tonalRamp": [
+          "#0A0B0D",
+          "#242527",
+          "#414244",
+          "#606163",
+          "#818284",
+          "#A3A5A7",
+          "#C7C9CB",
+          "#EDEFF1"
+        ],
+        "darkPair": "on-ink-dark"
+      },
+      "vinyl": {
+        "role": "neutral",
+        "displayName": "Vinyl",
+        "canonical": "#111214",
+        "oklch": "oklch(18.2% 0.004 264.5)",
+        "tonalRamp": [
+          "#0A0B0D",
+          "#242527",
+          "#414244",
+          "#606164",
+          "#818285",
+          "#A4A5A8",
+          "#C8C9CC",
+          "#EDEEF1"
+        ],
+        "darkPair": "vinyl-dark"
+      },
+      "groove": {
+        "role": "neutral",
+        "displayName": "Groove",
+        "canonical": "#2A2C31",
+        "oklch": "oklch(29.3% 0.010 268.3)",
+        "tonalRamp": [
+          "#090B0F",
+          "#23252A",
+          "#404247",
+          "#5F6167",
+          "#808288",
+          "#A2A5AB",
+          "#C6C9D0",
+          "#ECEEF5"
+        ],
+        "darkPair": "groove-dark"
+      },
+      "rim": {
+        "role": "neutral",
+        "displayName": "Rim",
+        "canonical": "#3A3D42",
+        "oklch": "oklch(35.9% 0.010 260.7)",
+        "tonalRamp": [
+          "#090B0F",
+          "#22252A",
+          "#3F4247",
+          "#5E6167",
+          "#7F8288",
+          "#A2A5AB",
+          "#C6C9CF",
+          "#EBEFF5"
+        ],
+        "darkPair": "rim-dark"
+      },
+      "label": {
+        "role": "neutral",
+        "displayName": "Label Paper",
+        "canonical": "#F3F4F5",
+        "oklch": "oklch(96.7% 0.002 247.8)",
+        "tonalRamp": [
+          "#0B0B0C",
+          "#242526",
+          "#414243",
+          "#606162",
+          "#818283",
+          "#A4A5A6",
+          "#C8C9CA",
+          "#EDEEEF"
+        ],
+        "darkPair": "label-dark"
+      },
+      "arm": {
+        "role": "neutral",
+        "displayName": "Tonearm Graphite",
+        "canonical": "#2B2F35",
+        "oklch": "oklch(30.4% 0.012 258.4)",
+        "tonalRamp": [
+          "#080B10",
+          "#21252B",
+          "#3E4249",
+          "#5D6268",
+          "#7E838A",
+          "#A0A5AD",
+          "#C4C9D1",
+          "#EAEFF7"
+        ],
+        "darkPair": "arm-dark"
+      },
+      "arm-highlight": {
+        "role": "neutral",
+        "displayName": "Arm Glint",
+        "canonical": "#9AA1A9",
+        "oklch": "oklch(70.6% 0.014 251.6)",
+        "tonalRamp": [
+          "#070C11",
+          "#20262C",
+          "#3D4349",
+          "#5C6269",
+          "#7C838B",
+          "#9FA6AE",
+          "#C3CAD2",
+          "#E8EFF8"
+        ],
+        "darkPair": "arm-highlight-dark"
+      },
+      "cue": {
+        "role": "secondary",
+        "displayName": "Cue Amber",
+        "canonical": "#FFB21F",
+        "oklch": "oklch(81.7% 0.165 76.2)",
+        "tonalRamp": [
+          "#130900",
+          "#342100",
+          "#5A3B00",
+          "#825800",
+          "#AD7600",
+          "#DA9600",
+          "#FFBB4D",
+          "#FFEBD0"
+        ]
+      },
+      "on-cue": {
+        "role": "secondary",
+        "displayName": "On Cue",
+        "canonical": "#15171A",
+        "oklch": "oklch(20.4% 0.007 258.4)",
+        "tonalRamp": [
+          "#090B0E",
+          "#232528",
+          "#404246",
+          "#5F6165",
+          "#808286",
+          "#A2A5A9",
+          "#C6C9CE",
+          "#ECEFF3"
+        ]
+      },
+      "cue-edge": {
+        "role": "secondary",
+        "displayName": "Cue Rim",
+        "canonical": "#B87900",
+        "oklch": "oklch(62.6% 0.133 73.0)",
+        "tonalRamp": [
+          "#130900",
+          "#352001",
+          "#5B3A02",
+          "#845604",
+          "#B07408",
+          "#D79635",
+          "#FEBB5E",
+          "#FEEBD4"
+        ],
+        "darkPair": "cue-edge-dark"
+      },
+      "plinth-dark": {
+        "role": "neutral",
+        "displayName": "Aluminum Plinth (dark theme)",
+        "canonical": "#15171A",
+        "oklch": "oklch(20.4% 0.007 258.4)",
+        "tonalRamp": [
+          "#090B0E",
+          "#232528",
+          "#404246",
+          "#5F6165",
+          "#808286",
+          "#A2A5A9",
+          "#C6C9CE",
+          "#ECEFF3"
+        ],
+        "lightPair": "plinth"
+      },
+      "surface-dark": {
+        "role": "neutral",
+        "displayName": "Brushed Panel (dark theme)",
+        "canonical": "#1F2226",
+        "oklch": "oklch(25.1% 0.009 255.6)",
+        "tonalRamp": [
+          "#090B0F",
+          "#222529",
+          "#3F4247",
+          "#5E6166",
+          "#7F8388",
+          "#A1A5AB",
+          "#C5C9CF",
+          "#EBEFF4"
+        ],
+        "lightPair": "surface"
+      },
+      "sunken-dark": {
+        "role": "neutral",
+        "displayName": "Recessed Well (dark theme)",
+        "canonical": "#0B0C0E",
+        "oklch": "oklch(15.4% 0.005 264.4)",
+        "tonalRamp": [
+          "#0A0B0D",
+          "#242527",
+          "#414244",
+          "#606164",
+          "#818285",
+          "#A3A5A8",
+          "#C7C9CC",
+          "#EDEEF2"
+        ],
+        "lightPair": "sunken"
+      },
+      "ink-dark": {
+        "role": "primary",
+        "displayName": "Graphite Ink (dark theme)",
+        "canonical": "#ECEEF0",
+        "oklch": "oklch(94.8% 0.003 247.9)",
+        "tonalRamp": [
+          "#0A0B0D",
+          "#242527",
+          "#414244",
+          "#606163",
+          "#818284",
+          "#A3A5A7",
+          "#C7C9CB",
+          "#EDEFF1"
+        ],
+        "lightPair": "ink"
+      },
+      "ink-muted-dark": {
+        "role": "neutral",
+        "displayName": "Muted Ink (dark theme)",
+        "canonical": "#A7ADB4",
+        "oklch": "oklch(74.5% 0.012 252.1)",
+        "tonalRamp": [
+          "#080C10",
+          "#21262B",
+          "#3D4348",
+          "#5C6268",
+          "#7D838A",
+          "#A0A6AD",
+          "#C4CAD1",
+          "#E9EFF7"
+        ],
+        "lightPair": "ink-muted"
+      },
+      "ink-faint-dark": {
+        "role": "neutral",
+        "displayName": "Faint Ink (dark theme)",
+        "canonical": "#858C94",
+        "oklch": "oklch(63.7% 0.015 251.6)",
+        "tonalRamp": [
+          "#070C11",
+          "#20262C",
+          "#3C434A",
+          "#5B6269",
+          "#7C838B",
+          "#9FA6AE",
+          "#C2CAD3",
+          "#E8EFF8"
+        ],
+        "lightPair": "ink-faint"
+      },
+      "line-dark": {
+        "role": "neutral",
+        "displayName": "Hairline (dark theme)",
+        "canonical": "#2E3238",
+        "oklch": "oklch(31.6% 0.012 258.4)",
+        "tonalRamp": [
+          "#080B10",
+          "#21252B",
+          "#3E4249",
+          "#5D6268",
+          "#7E838A",
+          "#A0A5AD",
+          "#C4C9D1",
+          "#EAEFF7"
+        ],
+        "lightPair": "line"
+      },
+      "on-ink-dark": {
+        "role": "neutral",
+        "displayName": "On Ink (dark theme)",
+        "canonical": "#15171A",
+        "oklch": "oklch(20.4% 0.007 258.4)",
+        "tonalRamp": [
+          "#090B0E",
+          "#232528",
+          "#404246",
+          "#5F6165",
+          "#808286",
+          "#A2A5A9",
+          "#C6C9CE",
+          "#ECEFF3"
+        ],
+        "lightPair": "on-ink"
+      },
+      "vinyl-dark": {
+        "role": "neutral",
+        "displayName": "Vinyl (dark theme)",
+        "canonical": "#08090A",
+        "oklch": "oklch(13.9% 0.003 246.3)",
+        "tonalRamp": [
+          "#0A0B0C",
+          "#242526",
+          "#414243",
+          "#606163",
+          "#818284",
+          "#A3A5A7",
+          "#C8C9CB",
+          "#EDEFF0"
+        ],
+        "lightPair": "vinyl"
+      },
+      "groove-dark": {
+        "role": "neutral",
+        "displayName": "Groove (dark theme)",
+        "canonical": "#1D1E21",
+        "oklch": "oklch(23.5% 0.006 271.2)",
+        "tonalRamp": [
+          "#0A0B0E",
+          "#242528",
+          "#414245",
+          "#606165",
+          "#818286",
+          "#A3A5A9",
+          "#C8C9CD",
+          "#EDEEF3"
+        ],
+        "lightPair": "groove"
+      },
+      "rim-dark": {
+        "role": "neutral",
+        "displayName": "Rim (dark theme)",
+        "canonical": "#44474D",
+        "oklch": "oklch(39.7% 0.011 264.4)",
+        "tonalRamp": [
+          "#090B10",
+          "#22252A",
+          "#3F4248",
+          "#5E6168",
+          "#7F8289",
+          "#A2A5AC",
+          "#C6C9D0",
+          "#EBEFF6"
+        ],
+        "lightPair": "rim"
+      },
+      "label-dark": {
+        "role": "neutral",
+        "displayName": "Label Paper (dark theme)",
+        "canonical": "#26292D",
+        "oklch": "oklch(28.0% 0.009 255.6)",
+        "tonalRamp": [
+          "#090B0F",
+          "#222529",
+          "#3F4247",
+          "#5E6166",
+          "#7F8387",
+          "#A2A5AA",
+          "#C5C9CF",
+          "#EBEFF4"
+        ],
+        "lightPair": "label"
+      },
+      "arm-dark": {
+        "role": "neutral",
+        "displayName": "Tonearm Graphite (dark theme)",
+        "canonical": "#B9BFC6",
+        "oklch": "oklch(80.2% 0.012 252.1)",
+        "tonalRamp": [
+          "#080C10",
+          "#21262B",
+          "#3E4348",
+          "#5C6268",
+          "#7D8389",
+          "#A0A6AC",
+          "#C4CAD1",
+          "#E9EFF6"
+        ],
+        "lightPair": "arm"
+      },
+      "arm-highlight-dark": {
+        "role": "neutral",
+        "displayName": "Arm Glint (dark theme)",
+        "canonical": "#E6E9EC",
+        "oklch": "oklch(93.3% 0.005 247.9)",
+        "tonalRamp": [
+          "#090B0D",
+          "#232527",
+          "#404245",
+          "#5F6164",
+          "#808385",
+          "#A2A5A8",
+          "#C6C9CC",
+          "#ECEFF2"
+        ],
+        "lightPair": "arm-highlight"
+      },
+      "cue-edge-dark": {
+        "role": "secondary",
+        "displayName": "Cue Rim (dark theme)",
+        "canonical": "#FFCF70",
+        "oklch": "oklch(87.8% 0.125 82.9)",
+        "tonalRamp": [
+          "#120A00",
+          "#322201",
+          "#563D01",
+          "#7C5B05",
+          "#A67A06",
+          "#CB9D3B",
+          "#F1C162",
+          "#FFECCA"
+        ],
+        "lightPair": "cue-edge"
+      },
+      "dish-cello": {
+        "role": "tertiary",
+        "displayName": "Salmon Red",
+        "canonical": "#E0481F",
+        "oklch": "oklch(61.2% 0.195 35.2)",
+        "tonalRamp": [
+          "#1D0200",
+          "#470D00",
+          "#781B01",
+          "#AD2B01",
+          "#DE461D",
+          "#FF7553",
+          "#FEB4A1",
+          "#FFE9E3"
+        ]
+      },
+      "dish-harp": {
+        "role": "tertiary",
+        "displayName": "Deep Harp Blue",
+        "canonical": "#3B4CC0",
+        "oklch": "oklch(47.5% 0.181 271.3)",
+        "tonalRamp": [
+          "#040033",
+          "#130076",
+          "#262DA0",
+          "#3F52C6",
+          "#5D75ED",
+          "#859EFE",
+          "#B6C7FE",
+          "#E9EEFF"
+        ]
+      },
+      "dish-marimba": {
+        "role": "tertiary",
+        "displayName": "Marimba Green",
+        "canonical": "#178A6E",
+        "oklch": "oklch(56.7% 0.105 171.0)",
+        "tonalRamp": [
+          "#000F09",
+          "#002D22",
+          "#024E3D",
+          "#04725A",
+          "#2B967A",
+          "#55BA9C",
+          "#7CE0C0",
+          "#BEFFE8"
+        ]
+      },
+      "dish-flute": {
+        "role": "tertiary",
+        "displayName": "Flute Rose",
+        "canonical": "#D33D84",
+        "oklch": "oklch(59.9% 0.196 355.8)",
+        "tonalRamp": [
+          "#1D000C",
+          "#490027",
+          "#7A0245",
+          "#AE0D65",
+          "#D64086",
+          "#FF66A9",
+          "#FFAECB",
+          "#FFE7EF"
+        ]
+      },
+      "dish-celesta": {
+        "role": "tertiary",
+        "displayName": "Celesta Violet",
+        "canonical": "#8A55C9",
+        "oklch": "oklch(56.3% 0.175 302.2)",
+        "tonalRamp": [
+          "#120026",
+          "#33005B",
+          "#56188D",
+          "#753FB2",
+          "#9763D8",
+          "#BA86FF",
+          "#D5BAFE",
+          "#F2EBFE"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "numeral": {
+        "displayName": "Numeral",
+        "purpose": "The Conduct countdown only, in its own slot beside the instruction.",
+        "source": "Type.numeral"
+      },
+      "display": {
+        "displayName": "Display",
+        "purpose": "One screen statement under the disc.",
+        "source": "Type.display"
+      },
+      "headline-stage": {
+        "displayName": "Headline Stage",
+        "purpose": "The current instruction on Conduct, up to two lines, announced as a live region.",
+        "source": "Type.headline at 34sp in ConductScreen.kt"
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section heads and Conduct moments.",
+        "source": "Type.headline"
+      },
+      "time": {
+        "displayName": "Time",
+        "purpose": "Cue times, Finale readings, the tempo marking, and numerals printed on disc labels.",
+        "source": "Type.time"
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Row titles and the Programme summary.",
+        "source": "Type.title"
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Instructions and explanations, capped at 360dp wide.",
+        "source": "Type.body"
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Pill text, Conduct instrument names, switch label.",
+        "source": "Type.button"
+      },
+      "body-small": {
+        "displayName": "Body Small",
+        "purpose": "Secondary row lines.",
+        "source": "Type.bodySmall"
+      },
+      "wordmark": {
+        "displayName": "Wordmark",
+        "purpose": "\"Tutti\" at the top left of Programme and Finale.",
+        "source": "Type.label at 15sp, 0.14em"
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Uppercase tags, track badges, status, and disc-label sub-lettering.",
+        "source": "Type.label"
+      }
+    },
+    "fonts": [
+      {
+        "family": "Archivo",
+        "file": "app/src/main/res/font/archivo.ttf",
+        "axes": {
+          "wdth": [
+            62,
+            100,
+            125
+          ],
+          "wght": [
+            400,
+            900
+          ]
+        },
+        "widths": {
+          "condensed": "wdth 62, wght 600/800/900",
+          "text": "wdth 100, wght 400/500/600/700",
+          "expanded": "wdth 125, wght 500/600/700"
+        }
+      }
+    ],
+    "shadows": [
+      {
+        "name": "disc-falloff",
+        "value": "radial-gradient(circle, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0.22) 80%, transparent 100%); radius 1.12 of disc radius, offset y 0.04 of radius",
+        "dark": "rgba(0,0,0,0.60) core",
+        "purpose": "Under every record."
+      },
+      {
+        "name": "pivot-falloff",
+        "value": "radial-gradient(circle, rgba(0,0,0,0.16) 0%, rgba(0,0,0,0.16) 80%, transparent 100%); radius 26dp, offset 2dp 4dp",
+        "dark": "rgba(0,0,0,0.50) core",
+        "purpose": "Under the tonearm pivot."
+      },
+      {
+        "name": "sleeve-lift",
+        "value": "Compose shadow elevation 1dp at rest, 6dp chosen, 4dp corners (approx. 0 1px 2px rgba(0,0,0,0.2) / 0 4px 10px rgba(0,0,0,0.22))",
+        "purpose": "The chosen sleeve rises as its record slides out; the only Material elevation."
+      },
+      {
+        "name": "vinyl-sheen",
+        "value": "sweep-gradient: transparent 0, white 9% at 0.07, transparent 0.16, transparent 0.55, white 6% at 0.61, transparent 0.70",
+        "purpose": "Fixed light on the vinyl that stays put while the disc turns."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "Motion.out. Anything responding to the cook: presses, screen entry, label ink swap, flashes, spin-down."
+      },
+      {
+        "name": "ease-in-out",
+        "value": "cubic-bezier(0.77, 0, 0.175, 1)",
+        "purpose": "Motion.inOut. Things already on screen changing place: needle drop and lift."
+      },
+      {
+        "name": "press",
+        "value": "scale 0.97, 90ms down / 180ms up, ease-out",
+        "purpose": "Every pill and tappable row sinks when pressed."
+      },
+      {
+        "name": "screen-enter",
+        "value": "fade 240ms + scale from 0.97 over 280ms, 80ms delay, ease-out; exit fade 90ms",
+        "purpose": "Screen changes; instant when Remove animations is on."
+      },
+      {
+        "name": "ui-state",
+        "value": "200-220ms ease-out",
+        "purpose": "Unchosen sleeve fade (to 58%), Conduct label paper swap, panel content fade-in."
+      },
+      {
+        "name": "sleeve-spring",
+        "value": "spring(dampingRatio 0.8, stiffness 380)",
+        "purpose": "Record sliding half out of its sleeve, turning 70 degrees."
+      },
+      {
+        "name": "arm-follow",
+        "value": "critically damped, 0.3s time constant",
+        "purpose": "Tonearm tracking the session in real time."
+      },
+      {
+        "name": "needle-drop",
+        "value": "2200ms ease-in-out after 300ms; lift 1000ms",
+        "purpose": "Tonearm lowering at the start and lifting after the final chord."
+      },
+      {
+        "name": "beat-rotation",
+        "value": "linear, 45 degrees per beat from the beat clock",
+        "purpose": "Disc spin and strobe pulse; disabled when Remove animations is on."
+      },
+      {
+        "name": "cue-flash",
+        "value": "white 30% on the slice, decays over 1400ms ease-out",
+        "purpose": "A cue firing on its dish's slice."
+      },
+      {
+        "name": "spin-down",
+        "value": "70 degrees over 2600ms ease-out; Finale settle 150 degrees over 2200ms",
+        "purpose": "The record slowing to a stop at the finale."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "Settings.Global.ANIMATOR_DURATION_SCALE == 0",
+        "purpose": "animationsEnabled(): no spin, instant needle, instant screen swaps, settled Finale."
+      }
+    ],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Primary Pill",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The committing action pinned at the thumb: Press the record, Drop the needle, Play the encore.",
+      "html": "<button class=\"ds-pill-primary\">Press the record</button>",
+      "css": ".ds-pill-primary { font-family: Archivo, 'Archivo Variable', sans-serif; font-weight: 600; font-stretch: 100%; font-size: 16px; line-height: 20px; min-height: 56px; padding: 16px 28px; border: none; border-radius: 9999px; background: #15171A; color: #F0F2F4; cursor: pointer; transition: transform 180ms cubic-bezier(0.23,1,0.32,1), background 200ms; } .ds-pill-primary:hover { background: #2B2F35; } .ds-pill-primary:focus-visible { outline: 2px solid #15171A; outline-offset: 3px; } .ds-pill-primary:active { transform: scale(0.97); transition-duration: 90ms; } .ds-pill-primary:disabled { background: #CCD1D6; color: #4D535A; }"
+    },
+    {
+      "name": "Done Pill (Signal)",
+      "kind": "button",
+      "refersTo": "button-signal",
+      "description": "Cue Amber pill; only the Done action on Conduct, meaning your hands, now.",
+      "html": "<button class=\"ds-pill-signal\">Done</button>",
+      "css": ".ds-pill-signal { font-family: Archivo, 'Archivo Variable', sans-serif; font-weight: 600; font-size: 16px; line-height: 20px; min-height: 56px; min-width: 160px; padding: 16px 28px; border: none; border-radius: 9999px; background: #FFB21F; color: #15171A; cursor: pointer; transition: transform 180ms cubic-bezier(0.23,1,0.32,1); } .ds-pill-signal:focus-visible { outline: 2px solid #B87900; outline-offset: 3px; } .ds-pill-signal:active { transform: scale(0.97); transition-duration: 90ms; } .ds-pill-signal:disabled { background: #CCD1D6; color: #4D535A; }"
+    },
+    {
+      "name": "Secondary Pill",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Outlined companion pill: +1 minute, New menu.",
+      "html": "<button class=\"ds-pill-secondary\">+1 minute</button>",
+      "css": ".ds-pill-secondary { font-family: Archivo, 'Archivo Variable', sans-serif; font-weight: 600; font-size: 16px; line-height: 20px; min-height: 56px; min-width: 160px; padding: 16px 24px; border-radius: 9999px; background: transparent; color: #15171A; border: 1.5px solid rgba(21,23,26,0.5); cursor: pointer; transition: transform 180ms cubic-bezier(0.23,1,0.32,1), background 200ms; } .ds-pill-secondary:hover { background: rgba(21,23,26,0.06); } .ds-pill-secondary:focus-visible { outline: 2px solid #15171A; outline-offset: 3px; } .ds-pill-secondary:active { transform: scale(0.97); transition-duration: 90ms; } .ds-pill-secondary:disabled { color: #4D535A; border-color: #C3C9CF; }"
+    },
+    {
+      "name": "Tag",
+      "kind": "chip",
+      "refersTo": "tag",
+      "description": "Small printed chip in the tracklist: Hands (emphasis) or Heat.",
+      "html": "<span class=\"ds-tag ds-tag-emphasis\">Hands</span> <span class=\"ds-tag\">Heat</span>",
+      "css": ".ds-tag { font-family: Archivo, 'Archivo Variable', sans-serif; font-stretch: 125%; font-weight: 600; font-size: 11px; line-height: 16px; letter-spacing: 0.08em; text-transform: uppercase; display: inline-block; padding: 5px 10px; border-radius: 9999px; background: #CCD1D6; color: #4D535A; } .ds-tag-emphasis { color: #15171A; }"
+    },
+    {
+      "name": "Crate Row",
+      "kind": "custom",
+      "refersTo": "crate-row",
+      "description": "A dish in the crate: sleeve, name, instrument and minutes, and a track badge; toggles onto the record.",
+      "html": "<div class=\"ds-crate\"><label class=\"ds-crate-row\" tabindex=\"0\"><span class=\"ds-sleeve\" style=\"background:#E0481F\"></span><span class=\"ds-crate-text\"><span class=\"ds-crate-title\">Garlic-Butter Salmon</span><span class=\"ds-crate-sub\">cello, 17 min</span></span><span class=\"ds-badge ds-badge-on\">A1</span></label><label class=\"ds-crate-row ds-crate-off\" tabindex=\"0\"><span class=\"ds-sleeve\" style=\"background:#3B4CC0\"></span><span class=\"ds-crate-text\"><span class=\"ds-crate-title\">Lemon-Herb Rice</span><span class=\"ds-crate-sub\">harp, 29 min</span></span><span class=\"ds-badge\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"#4D535A\"><path d=\"M19,13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z\"/></svg></span></label></div>",
+      "css": ".ds-crate { background: #E3E6E9; padding: 8px 12px; display: flex; flex-direction: column; gap: 4px; } .ds-crate-row { font-family: Archivo, 'Archivo Variable', sans-serif; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 16px; cursor: pointer; transition: transform 180ms cubic-bezier(0.23,1,0.32,1), background 200ms; } .ds-crate-row:hover { background: rgba(21,23,26,0.05); } .ds-crate-row:focus-visible { outline: 2px solid #15171A; outline-offset: 2px; } .ds-crate-row:active { transform: scale(0.97); } .ds-sleeve { width: 60px; height: 60px; border-radius: 4px; flex: none; box-shadow: 0 4px 10px rgba(0,0,0,0.22); background-image: radial-gradient(circle, rgba(0,0,0,0.16) 0 11px, rgba(255,255,255,0.22) 11px 12px, transparent 12px); transition: opacity 200ms cubic-bezier(0.23,1,0.32,1); } .ds-crate-off .ds-sleeve { opacity: 0.58; box-shadow: 0 1px 2px rgba(0,0,0,0.2); } .ds-crate-text { flex: 1; display: flex; flex-direction: column; padding: 0 12px 0 8px; } .ds-crate-title { font-weight: 600; font-size: 19px; line-height: 24px; letter-spacing: -0.005em; color: #15171A; } .ds-crate-off .ds-crate-title { color: #4D535A; } .ds-crate-sub { font-size: 14px; line-height: 20px; color: #4D535A; } .ds-badge { width: 40px; height: 40px; border-radius: 9999px; border: 1.5px solid #C3C9CF; display: grid; place-items: center; box-sizing: border-box; font-stretch: 125%; font-weight: 600; font-size: 11px; letter-spacing: 0.08em; } .ds-badge-on { background: #15171A; border-color: #15171A; color: #F0F2F4; }"
+    },
+    {
+      "name": "Dish State Line",
+      "kind": "custom",
+      "refersTo": "dish-state-hands",
+      "description": "Conduct dish status told four ways: label mark, instrument, detail, and a pill whose fill, border, and word change.",
+      "html": "<div class=\"ds-dishes\"><div class=\"ds-dish\"><span class=\"ds-mark\" style=\"--ink:#3B4CC0\"></span><span class=\"ds-dish-text\"><b>Harp</b><small>Rinse the rice</small></span><span class=\"ds-state ds-state-hands\">hands</span></div><div class=\"ds-dish\"><span class=\"ds-mark\" style=\"--ink:#178A6E\"></span><span class=\"ds-dish-text\"><b>Marimba</b><small>Roast until charred</small></span><span class=\"ds-state ds-state-cooking\">12:40</span></div><div class=\"ds-dish\"><span class=\"ds-mark\" style=\"--ink:#E0481F\"></span><span class=\"ds-dish-text\"><b>Cello</b><small>Starts with Pat dry &amp; season</small></span><span class=\"ds-state ds-state-waiting\">in 13:10</span></div><div class=\"ds-dish\"><span class=\"ds-mark\" style=\"--ink:#8A55C9\"></span><span class=\"ds-dish-text\"><b>Celesta</b><small>Holding for the final chord</small></span><span class=\"ds-state ds-state-ready\">ready</span></div></div>",
+      "css": ".ds-dishes { font-family: Archivo, 'Archivo Variable', sans-serif; background: #E3E6E9; padding: 12px 20px 8px 24px; display: flex; flex-direction: column; gap: 8px; } .ds-dish { display: flex; align-items: center; min-height: 48px; } .ds-mark { width: 24px; height: 24px; border-radius: 50%; flex: none; background: radial-gradient(circle, #E3E6E9 0 3px, var(--ink) 3.2px); } .ds-dish-text { flex: 1; display: flex; flex-direction: column; padding: 0 14px; } .ds-dish-text b { font-weight: 600; font-size: 16px; line-height: 20px; color: #15171A; } .ds-dish-text small { font-size: 14px; line-height: 20px; color: #4D535A; } .ds-state { font-weight: 600; font-size: 15px; line-height: 20px; font-variant-numeric: tabular-nums; padding: 5px 12px; border-radius: 9999px; border: 1px solid transparent; } .ds-state-hands { background: #FFB21F; color: #15171A; border-color: #B87900; } .ds-state-cooking { background: #CCD1D6; color: #15171A; } .ds-state-waiting { color: #4D535A; border-color: #C3C9CF; } .ds-state-ready { background: #15171A; color: #F0F2F4; }"
+    },
+    {
+      "name": "Stage Readout",
+      "kind": "custom",
+      "refersTo": "headline-stage",
+      "description": "Conduct's current instruction with the countdown in its own slot, so the text being read never moves.",
+      "html": "<div class=\"ds-stage\"><h2>Rinse the rice</h2><p>One cup, cold water, swirl until it runs clear.</p><div class=\"ds-stage-row\"><div class=\"ds-stage-left\"><span class=\"ds-marking\">Moderato</span><span class=\"ds-hint\"><i></i><i></i><i class=\"on\"></i><i></i> prep at an easy pace</span></div><span class=\"ds-numeral\">2:10</span></div></div>",
+      "css": ".ds-stage { font-family: Archivo, 'Archivo Variable', sans-serif; background: #E3E6E9; padding: 4px 24px 12px; } .ds-stage h2 { margin: 0; font-weight: 700; font-size: 34px; line-height: 38px; letter-spacing: -0.02em; color: #15171A; } .ds-stage p { margin: 4px 0 0; font-size: 16px; line-height: 24px; color: #4D535A; } .ds-stage-row { display: flex; align-items: flex-end; } .ds-stage-left { flex: 1; padding: 0 12px 14px 0; display: flex; flex-direction: column; gap: 6px; } .ds-marking { font-stretch: 62%; font-weight: 800; font-size: 22px; line-height: 24px; color: #15171A; } .ds-hint { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #4D535A; } .ds-hint i { width: 8px; height: 8px; border-radius: 50%; background: #15171A; opacity: 0.28; } .ds-hint i.on { opacity: 1; transform: scale(1.3); } .ds-hint i:last-of-type { margin-right: 4px; } .ds-numeral { font-stretch: 62%; font-weight: 900; font-size: 84px; line-height: 80px; font-variant-numeric: tabular-nums; color: #15171A; }"
+    },
+    {
+      "name": "Readings Card",
+      "kind": "card",
+      "refersTo": "readings-card",
+      "description": "The one card: Finale readings in tonal lift on the plinth, no shadow.",
+      "html": "<div class=\"ds-card-ground\"><div class=\"ds-card\"><div class=\"ds-reading\"><span>Length</span><b>38:00</b></div><div class=\"ds-reading\"><span>Cues played</span><b>14</b></div><div class=\"ds-reading\"><span>Re-scored</span><b>1×</b></div></div></div>",
+      "css": ".ds-card-ground { background: #E3E6E9; padding: 16px; } .ds-card { font-family: Archivo, 'Archivo Variable', sans-serif; background: #F0F2F4; border-radius: 16px; padding: 8px 20px; } .ds-reading { display: flex; padding: 12px 0; } .ds-reading span { flex: 1; font-size: 16px; line-height: 24px; color: #4D535A; } .ds-reading b { font-stretch: 62%; font-weight: 800; font-size: 22px; line-height: 24px; font-variant-numeric: tabular-nums; color: #15171A; }"
+    },
+    {
+      "name": "Top Bar",
+      "kind": "nav",
+      "refersTo": "glyph-button",
+      "description": "No nav bar: a 48dp close or back glyph, the status in label caps, and a 48dp volume glyph.",
+      "html": "<div class=\"ds-topbar\"><button class=\"ds-glyph\" aria-label=\"Stop the performance\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"#15171A\"><path d=\"M19,6.41L17.59,5 12,10.59 6.41,5 5,6.41 10.59,12 5,17.59 6.41,19 12,13.41 17.59,19 19,17.59 13.41,12z\"/></svg></button><span class=\"ds-status\">Rehearsal&nbsp;&nbsp;20×</span><button class=\"ds-glyph\" aria-label=\"Mute the orchestra\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"#15171A\"><path d=\"M3,9v6h4l5,5V4L7,9H3zM16.5,12c0,-1.77 -1.02,-3.29 -2.5,-4.03v8.05c1.48,-0.73 2.5,-2.25 2.5,-4.02zM14,3.23v2.06c2.89,0.86 5,3.54 5,6.71s-2.11,5.85 -5,6.71v2.06c4.01,-0.91 7,-4.49 7,-8.77s-2.99,-7.86 -7,-8.77z\"/></svg></button></div>",
+      "css": ".ds-topbar { font-family: Archivo, 'Archivo Variable', sans-serif; display: flex; align-items: center; padding: 0 4px; background: #E3E6E9; } .ds-glyph { width: 48px; height: 48px; border: none; border-radius: 9999px; background: transparent; display: grid; place-items: center; cursor: pointer; transition: background 200ms; } .ds-glyph:hover { background: rgba(21,23,26,0.08); } .ds-glyph:focus-visible { outline: 2px solid #15171A; outline-offset: 0; } .ds-status { flex: 1; padding-left: 8px; font-stretch: 125%; font-weight: 600; font-size: 11px; line-height: 16px; letter-spacing: 0.08em; text-transform: uppercase; color: #4D535A; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Turntable on the Counter",
+    "overview": "Dinner is a record you play. Every surface of Tutti is part of one modern deck: a flat aluminum-grey plinth (smoked graphite in the dark theme), a matte black disc pressed with one groove band per dish, a graphite tonearm that tracks inward through the cues, and a single amber cue light that means your hands, now. Time runs inward from the rim to the label, so the needle reaching the label means serve.\n\nThe interface is quiet, cool, and precise so the few moments that matter can be loud: a cue lighting the arm, a label swapping to a dish's ink, the record slowing to a stop at the finale. Color lives only in printed things (sleeves, labels, groove bands, label marks), and chrome stays in two inks on the plinth. Type is one family, Archivo, pulled to three widths: condensed heavy numerals you can read from across a kitchen, a normal width for instructions, and expanded caps for the lettering printed on labels.\n\nDensity is low and thumb-led. Each screen puts the disc at the top, one large statement under it, rows of dishes below, and the committing pill pinned at the bottom where a wet thumb reaches it. The world rejects recipe cards stacked with countdown timers and the album-art-plus-play-button music screen.",
+    "keyCharacteristics": [
+      "One flat plinth ground; depth only from objects that sit on it (disc, arm, sleeves).",
+      "Two chrome inks (ink and ink-muted) plus one amber signal; dish inks printed only on record parts.",
+      "Archivo at three widths: condensed 62, normal 100, expanded 125.",
+      "Circles and pills for controls, 16dp soft rows, 4dp square sleeves.",
+      "Physical motion: damped springs, strong ease-out for UI, linear rotation locked to the beat clock.",
+      "Full light and dark themes that follow the system; Remove animations is honored."
+    ],
+    "rules": [
+      {
+        "name": "The Cue Light Rule",
+        "body": "Amber means \"your hands, now\" and nothing else: the lit cue lamp, the Done pill, and the hands-state dish pill. Never use it for decoration, selection, links, or brand emphasis.",
+        "section": "colors"
+      },
+      {
+        "name": "The Printed Ink Rule",
+        "body": "Dish inks appear only on record parts (sleeves, bands, labels, label marks, motif contours). Plinth, panels, chrome, and text stay in the neutral inks.",
+        "section": "colors"
+      },
+      {
+        "name": "The Named Ink Rule",
+        "body": "A dish's color is never its only identifier. Every label mark, sleeve, and band sits beside the instrument name, the dish name, or its track number (A1 to A5).",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Themes Rule",
+        "body": "Every token has a light and a dark value chosen from the system setting; cue amber is the only color shared by both. Dynamic color is not used.",
+        "section": "colors"
+      },
+      {
+        "name": "The Three Widths Rule",
+        "body": "Condensed is for figures and the one display statement; normal is for anything read as a sentence; expanded is for short uppercase lettering only. Never set a sentence in condensed or expanded.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Time Rule",
+        "body": "Tabular figures are for time and nothing else: the countdown, cue times, readings, and dish-state pills. Numbers that change while watched never shift width.",
+        "section": "typography"
+      },
+      {
+        "name": "The sp Rule",
+        "body": "Every text size is in sp so it follows the system font scale; at font scale above 1.15 the Programme summary and its pill stack instead of sitting side by side.",
+        "section": "typography"
+      },
+      {
+        "name": "The Still Instruction Rule",
+        "body": "On Conduct the countdown sits in its own right-aligned slot beside the instruction, so the text being read never moves as the numbers change.",
+        "section": "layout"
+      },
+      {
+        "name": "The Thumb Bar Rule",
+        "body": "The one committing action on each screen (\"Press the record\", \"Drop the needle\", Done) is a pill pinned at the bottom, never at the top.",
+        "section": "layout"
+      },
+      {
+        "name": "The Objects Cast Rule",
+        "body": "Only the disc, the tonearm, and sleeves cast shadows. Pills, rows, cards, and tags stay flat.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Falloff Rule",
+        "body": "Shadows fade from a solid core to transparent. Never a hard offset copy of the shape.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Flat Plinth Rule",
+        "body": "The plinth is a flat fill. No brushed-metal texture, noise, or gradient on the ground; the only gradient on it is the bottom-bar fade back into plinth.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Three Radii Rule",
+        "body": "Pill for controls, 16dp for rows and cards, 4dp for sleeves. No other corner values.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "**Do** set every screen on the flat Aluminum Plinth and let the disc, arm, and sleeves be the only objects with depth.",
+      "**Do** reserve Cue Amber (#FFB21F) for the cue lamp, the Done pill, and the hands-state pill.",
+      "**Do** pair every dish ink with its instrument name, dish name, or track number.",
+      "**Do** use Archivo condensed for figures and the one display statement, normal for sentences, and expanded for short uppercase label lettering.",
+      "**Do** use tabular figures for every time value, and keep the countdown in its own slot so the instruction never moves.",
+      "**Do** keep to three radii: pills for controls, 16dp for rows and cards, 4dp for sleeves.",
+      "**Do** make every shadow a soft radial falloff that deepens in dark theme.",
+      "**Do** provide light and dark values for every new color and check `animationsEnabled()` before any decorative or long-running motion.",
+      "**Do** keep touch targets at 48dp or more and primary pills at 56dp, pinned at the thumb."
+    ],
+    "donts": [
+      "**Don't** add brushed-metal texture, noise, or gradients to the plinth.",
+      "**Don't** use amber for selection, links, highlights, or brand color.",
+      "**Don't** paint dish inks onto panels, chrome, or text; they are printed on record parts only.",
+      "**Don't** let color alone tell dishes or dish states apart.",
+      "**Don't** use hard offset shadows or Material elevation on pills, rows, or cards.",
+      "**Don't** put small uppercase tags or eyebrows above headings; a statement stands on its own.",
+      "**Don't** set sentences in condensed or expanded widths, or use fixed px for text.",
+      "**Don't** enable dynamic color; the deck's inks replace the wallpaper palette."
+    ]
+  }
+}

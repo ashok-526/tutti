@@ -8,3 +8,5 @@ build/
 .externalNativeBuild
 .cxx
 .kotlin/
+# Impeccable review captures are working evidence, not source.
+.impeccable/review/

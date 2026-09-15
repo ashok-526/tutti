@@ -26,7 +26,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.sp
 import app.tutti.session.TuttiState
 
 @Composable
@@ -38,15 +41,19 @@ fun FinaleScreen(state: TuttiState) {
     val settle = remember { Animatable(if (motion) 0f else 1f) }
     LaunchedEffect(Unit) { if (motion) settle.animateTo(1f, tween(2200, easing = Motion.out)) }
 
+    Box(Modifier.fillMaxSize().background(colors.plinth)) {
     Column(
         Modifier
             .fillMaxSize()
-            .background(colors.plinth)
             .verticalScroll(rememberScrollState())
             .statusBarsPadding()
             .navigationBarsPadding(),
     ) {
-        Text("Tutti", style = Type.label.copy(color = colors.ink), modifier = Modifier.padding(start = 24.dp, top = 16.dp))
+        Text(
+            "Tutti",
+            style = Type.label.copy(color = colors.ink, fontSize = 15.sp, letterSpacing = 0.14.em),
+            modifier = Modifier.padding(start = 24.dp, top = 16.dp),
+        )
 
         Turntable(
             score = score,
@@ -103,6 +110,8 @@ fun FinaleScreen(state: TuttiState) {
             SecondaryButton("New menu", onClick = { state.newProgramme() }, modifier = Modifier.weight(1f))
         }
         Spacer(Modifier.height(8.dp))
+    }
+    StatusBarScrim()
     }
 }
 

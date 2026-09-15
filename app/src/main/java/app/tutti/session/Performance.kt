@@ -239,9 +239,11 @@ class Performance(
 
     fun upcoming(limit: Int): List<Slot> = score.cues.filter { it.start > now }.take(limit)
 
-    fun dishNow(dish: Int): DishNow {
+    fun dishNow(dish: Int): DishNow = dishAt(dish, now)
+
+    /** A dish's state at session time [t], without subscribing the caller to every clock tick. */
+    fun dishAt(dish: Int, t: Float): DishNow {
         val slots = score.slotsFor(dish)
-        val t = now
         val current = slots.firstOrNull { it.start <= t && t < it.end }
         val next = slots.firstOrNull { it.start > t }
         return when {

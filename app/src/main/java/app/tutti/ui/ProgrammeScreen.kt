@@ -32,10 +32,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -53,6 +56,8 @@ fun ProgrammeScreen(state: TuttiState) {
     val colors = tutti
     val menu = state.menu
     val preview = remember(menu.map { it.id }) { if (menu.isEmpty()) null else Conductor.compose(menu) }
+    // With large system fonts the summary and the pill no longer fit side by side, so they stack.
+    val stacked = LocalDensity.current.fontScale > 1.15f
 
     Box(Modifier.fillMaxSize().background(colors.plinth)) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
@@ -100,31 +105,52 @@ fun ProgrammeScreen(state: TuttiState) {
                     CrateRow(recipe, state.selected.indexOf(recipe.id)) { state.toggle(recipe) }
                 }
             }
-            Spacer(Modifier.height(140.dp))
+            Spacer(Modifier.height(if (stacked) 240.dp else 140.dp))
         }
 
-        Row(
+        val summary: @Composable () -> Unit = {
+            Text(
+                if (preview != null) "${minutesLabel(preview.tutti)} to the table" else "Pick a dish",
+                style = Type.title.copy(color = colors.ink),
+            )
+            Text(
+                if (preview != null) "${minutesLabel(preview.handsOnSeconds)} of it hands-on" else "to press your record",
+                style = Type.bodySmall.copy(color = colors.inkMuted),
+            )
+        }
+        Column(
             Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .swallowTouches()
-                .background(Brush.verticalGradient(0f to colors.plinth.copy(alpha = 0f), 0.3f to colors.plinth))
+                .drawBehind {
+                    // A short fixed fade, then solid plinth, so text never sits over rows however tall the bar grows.
+                    val fade = 24.dp.toPx()
+                    drawRect(
+                        Brush.verticalGradient(0f to colors.plinth.copy(alpha = 0f), 1f to colors.plinth, startY = 0f, endY = fade),
+                        size = Size(size.width, fade),
+                    )
+                    drawRect(colors.plinth, topLeft = Offset(0f, fade), size = Size(size.width, size.height - fade))
+                }
                 .navigationBarsPadding()
                 .padding(start = 24.dp, end = 16.dp, top = 36.dp, bottom = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(Modifier.weight(1f)) {
-                Text(
-                    if (preview != null) "${minutesLabel(preview.tutti)} to the table" else "Pick a dish",
-                    style = Type.title.copy(color = colors.ink),
+            if (stacked) {
+                summary()
+                PrimaryButton(
+                    "Press the record",
+                    onClick = { state.compose() },
+                    enabled = preview != null,
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                 )
-                Text(
-                    if (preview != null) "${minutesLabel(preview.handsOnSeconds)} of it hands-on" else "to press your record",
-                    style = Type.bodySmall.copy(color = colors.inkMuted),
-                )
+            } else {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) { summary() }
+                    PrimaryButton("Press the record", onClick = { state.compose() }, enabled = preview != null)
+                }
             }
-            PrimaryButton("Press the record", onClick = { state.compose() }, enabled = preview != null)
         }
+        StatusBarScrim()
     }
 }
 
@@ -152,13 +178,8 @@ private fun CrateRow(recipe: Recipe, index: Int, onToggle: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Sleeve(recipe.color, chosen, Modifier.graphicsLayer { alpha = presence })
-        Column(
-            Modifier
-                .weight(1f)
-                .padding(start = 8.dp, end = 12.dp)
-                .graphicsLayer { alpha = presence },
-        ) {
-            Text(recipe.name, style = Type.title.copy(color = colors.ink), maxLines = 1)
+        Column(Modifier.weight(1f).padding(start = 8.dp, end = 12.dp)) {
+            Text(recipe.name, style = Type.title.copy(color = if (chosen) colors.ink else colors.inkMuted), maxLines = 1)
             Text(
                 "${recipe.instrument.label.lowercase()}, ${minutesLabel(recipe.totalSeconds)}",
                 style = Type.bodySmall.copy(color = colors.inkMuted),

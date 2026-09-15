@@ -8,7 +8,7 @@
 :root {
   --plinth:#E3E6E9; --shade:#D5D9DD; --surface:#F0F2F4; --sunken:#CCD1D6; --ink:#15171A; --muted:#4D535A; --faint:#737A82; --line:#C3C9CF;
   --vinyl:#111214; --groove:#2A2C31; --label:#F3F4F5; --cue:#FFB21F; --cue-edge:#B87900;
-  --tomato:#E0523A; --cobalt:#3867D6; --basil:#2F9E5A; --pink:#E0569B; --plum:#7B4FC2;
+  --tomato:#E0481F; --cobalt:#3B4CC0; --basil:#178A6E; --pink:#D33D84; --plum:#8A55C9;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #8b9096; font-family: "Archivo", "Helvetica Neue", Arial, sans-serif; color: var(--ink); }
@@ -34,19 +34,6 @@ h3 { font-size: 52px; line-height: 1; font-stretch: 100%; font-weight: 700; lett
 .vinyl .phone { box-shadow: 0 0 0 10px #2b2e33, 0 36px 90px rgba(0,0,0,.6); }
 .phone img { display: block; width: 100%; }
 
-/* The record: sliced by dish, grooved, labelled. */
-.record { position: relative; border-radius: 50%; flex: none;
-  background:
-    repeating-radial-gradient(circle at center, rgba(255,255,255,.045) 0 1px, transparent 1px 7px),
-    conic-gradient(from 0deg, var(--tomato) 0 118deg, transparent 118deg 122deg, var(--cobalt) 122deg 238deg, transparent 238deg 242deg, var(--basil) 242deg 358deg, transparent 358deg 360deg);
-  box-shadow: 0 30px 60px rgba(21,23,26,.3); }
-.record::before { content: ""; position: absolute; inset: 0; border-radius: 50%;
-  background: radial-gradient(circle at center, var(--vinyl) 0 30%, transparent 30% 43%, var(--vinyl) 43% 50%), conic-gradient(from 20deg, transparent 0 20deg, rgba(255,255,255,.09) 30deg, transparent 50deg 200deg, rgba(255,255,255,.06) 215deg, transparent 235deg);
-  mix-blend-mode: normal; }
-.record::after { content: ""; position: absolute; inset: 32%; border-radius: 50%; background: var(--label); box-shadow: inset 0 0 0 2px rgba(0,0,0,.12); }
-.record .mask { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at center, transparent 0 43%, rgba(17,18,20,.72) 43% 47.5%, var(--vinyl) 47.5% 48.5%, transparent 48.5%); }
-.record .readout { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2; color: var(--ink); }
-
 /* II */
 .timer { position: absolute; width: 470px; padding: 26px 32px 28px; background: var(--surface); border-radius: 20px; box-shadow: 0 24px 48px rgba(21,23,26,.16); }
 .timer .who { font-weight: 600; font-stretch: 125%; font-size: 18px; letter-spacing: .12em; color: var(--muted); display: flex; align-items: center; gap: 12px; }
@@ -69,7 +56,7 @@ h3 { font-size: 52px; line-height: 1; font-stretch: 100%; font-weight: 700; lett
 .legend { margin-top: 48px; display: grid; grid-template-columns: 110px 1fr; row-gap: 28px; align-items: center; font-size: 31px; }
 .sw-slice { width: 76px; height: 40px; border-radius: 40px 40px 0 0; background: conic-gradient(from 270deg at 50% 100%, var(--tomato) 0 58deg, transparent 58deg 64deg, var(--cobalt) 64deg 122deg, transparent 122deg 128deg, var(--basil) 128deg 180deg, transparent 180deg); }
 .sw-solid { width: 76px; height: 26px; border-radius: 6px; background: var(--cobalt); }
-.sw-groove { width: 76px; height: 26px; border-radius: 6px; background: repeating-linear-gradient(0deg, rgba(56,103,214,.85) 0 2px, rgba(56,103,214,.16) 2px 7px); }
+.sw-groove { width: 76px; height: 26px; border-radius: 6px; background: repeating-linear-gradient(0deg, rgba(59,76,192,.85) 0 2px, rgba(59,76,192,.16) 2px 7px); }
 .sw-label { width: 44px; height: 44px; border-radius: 50%; background: var(--vinyl); box-shadow: inset 0 0 0 11px var(--vinyl), inset 0 0 0 30px var(--label); margin-left: 16px; }
 .stats { display: flex; gap: 72px; margin-top: 56px; padding-top: 30px; border-top: 2px solid var(--ink); }
 .stat .n { font-weight: 900; font-stretch: 62%; font-size: 88px; line-height: 1; font-variant-numeric: tabular-nums; }
@@ -216,8 +203,8 @@ h3 { font-size: 52px; line-height: 1; font-stretch: 100%; font-weight: 700; lett
       <div class="tempi">
         <div class="m" style="color:var(--tomato)">Allegro</div><div class="b">104 bpm</div><div class="a">chop on the beat</div>
         <div class="m" style="color:var(--pink)">Presto</div><div class="b">126 bpm</div><div class="a">whisk in sixteenths</div>
-        <div class="m" style="color:#6f93ea">Andante</div><div class="b">84 bpm</div><div class="a">stir with the phrase</div>
-        <div class="m" style="color:#4cc07b">Adagio</div><div class="b">72 bpm</div><div class="a">the rice simmers as a quiet drone</div>
+        <div class="m" style="color:#8C97EC">Andante</div><div class="b">84 bpm</div><div class="a">stir with the phrase</div>
+        <div class="m" style="color:#3DBE9C">Adagio</div><div class="b">72 bpm</div><div class="a">the rice simmers as a quiet drone</div>
       </div>
       <div style="margin-top:44px; display:flex; align-items:center; gap:24px;"><span class="cue">Your hands</span><span class="lede" style="font-size:28px;">The amber light means now. The tonearm tracks inward; the strobe dots pulse on every beat.</span></div>
     </div>
@@ -315,10 +302,10 @@ h3 { font-size: 52px; line-height: 1; font-stretch: 100%; font-weight: 700; lett
 </section>
 
 <!-- 12 · Close -->
-<section class="slide vinyl" style="justify-content:center; align-items:center; text-align:center;">
-  <div class="record" style="width:360px; height:360px;"><div class="mask"></div><div class="readout"><div class="num" style="font-size:72px; line-height:1;">Tutti</div><div class="caps" style="font-size:14px; margin-top:6px; color:var(--muted);">Serve now</div></div></div>
-  <h2 style="font-size:132px; margin-top:64px; color:#F0F2F4;">When the needle reaches the label,<br>you serve.</h2>
-  <div style="font-size:30px; letter-spacing:.02em; color:#A7ADB4; margin-top:48px;">github.com/ashok-526/tutti</div>
+<section class="slide" style="justify-content:center; align-items:center; text-align:center;">
+  <img src="record.png" alt="The Tutti record, played through to the label" style="width:540px; height:auto; margin-top:-24px;">
+  <h2 style="font-size:124px; margin-top:20px;">When the needle reaches the label,<br>you serve.</h2>
+  <div style="font-size:30px; letter-spacing:.02em; color:var(--muted); margin-top:40px;">github.com/ashok-526/tutti</div>
 </section>
 
 <script>

@@ -64,7 +64,7 @@ object RecipeBook {
         name = "Garlic-Butter Salmon",
         note = "Crisp skin, basted in brown butter",
         instrument = Instrument.CELLO,
-        color = Color(0xFFE0523A),
+        color = Color(0xFFE0481F),
         motif = listOf(0, 3, 4, 3),
         holdSeconds = 90,
         steps = listOf(
@@ -82,7 +82,7 @@ object RecipeBook {
         name = "Lemon-Herb Rice",
         note = "Fluffy, bright, forgiving",
         instrument = Instrument.HARP,
-        color = Color(0xFF3867D6),
+        color = Color(0xFF3B4CC0),
         motif = listOf(5, 4, 2, 3),
         holdSeconds = 300,
         steps = listOf(
@@ -100,7 +100,7 @@ object RecipeBook {
         name = "Charred Broccoli",
         note = "Blistered edges, chili, parmesan",
         instrument = Instrument.MARIMBA,
-        color = Color(0xFF2F9E5A),
+        color = Color(0xFF178A6E),
         motif = listOf(3, 3, 4, 5),
         holdSeconds = 180,
         steps = listOf(
@@ -119,7 +119,7 @@ object RecipeBook {
         name = "Little Gem Caesar",
         note = "Whisked dressing, torn croutons",
         instrument = Instrument.FLUTE,
-        color = Color(0xFFE0569B),
+        color = Color(0xFFD33D84),
         motif = listOf(7, 6, 5, 3),
         holdSeconds = 120,
         steps = listOf(
@@ -135,7 +135,7 @@ object RecipeBook {
         name = "Molten Mug Cake",
         note = "Ninety seconds to chocolate",
         instrument = Instrument.CELESTA,
-        color = Color(0xFF7B4FC2),
+        color = Color(0xFF8A55C9),
         motif = listOf(5, 7, 6, 8),
         holdSeconds = 240,
         steps = listOf(

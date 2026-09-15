@@ -9,7 +9,12 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
@@ -112,6 +117,18 @@ fun GlyphButton(glyph: ImageVector, description: String, onClick: () -> Unit, mo
     IconButton(onClick = onClick, modifier = modifier.size(48.dp)) {
         Icon(glyph, contentDescription = description, tint = tint)
     }
+}
+
+/** Keeps the system clock and icons legible over scrolling content and the vinyl. */
+@Composable
+fun BoxScope.StatusBarScrim() {
+    Box(
+        Modifier
+            .align(Alignment.TopCenter)
+            .fillMaxWidth()
+            .windowInsetsTopHeight(WindowInsets.statusBars)
+            .background(tutti.plinth),
+    )
 }
 
 /** A dish's identity mark: its printed record label, spindle hole and all. */

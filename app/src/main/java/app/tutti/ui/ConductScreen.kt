@@ -5,7 +5,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -16,27 +15,28 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -59,8 +59,11 @@ import app.tutti.schedule.Slot
 import app.tutti.session.Performance
 import app.tutti.session.Phase
 import app.tutti.session.TuttiState
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlin.math.exp
 import kotlin.math.floor
 import kotlin.math.pow
 
@@ -77,19 +80,35 @@ fun ConductScreen(state: TuttiState, performance: Performance) {
     val colors = tutti
     val motion = animationsEnabled()
     val score = performance.score
-    val now = performance.now
-    val current = performance.currentHandsOn()
-    val total = maxOf(score.tutti, score.slots.maxOf { it.end }).toFloat()
+    val total = maxOf(score.tutti, score.slots.maxOf { it.end }).toFloat().coerceAtLeast(60f)
+
+    // Composition only follows whole seconds and step changes; frame-rate motion lives in draw.
+    val clock by remember(performance) { derivedStateOf { performance.now.toInt() } }
+    val current by remember(performance) { derivedStateOf { performance.currentHandsOn() } }
 
     var beat by remember { mutableDoubleStateOf(0.0) }
+    var arm by remember { mutableFloatStateOf(0f) }
     val spin = remember { Animatable(0f) }
     LaunchedEffect(performance.finished, motion) {
         if (performance.finished) {
-            if (motion) spin.animateTo(spin.value + 70f, tween(2600, easing = Motion.out))
+            coroutineScope {
+                launch { if (motion) spin.animateTo(spin.value + 70f, tween(2600, easing = Motion.out)) }
+                launch {
+                    Animatable(arm).animateTo(1f, spring(dampingRatio = 1f, stiffness = Spring.StiffnessLow)) { arm = value }
+                }
+            }
             return@LaunchedEffect
         }
+        var last = 0L
         while (isActive) {
-            withFrameMillis { beat = state.orchestra.beatClock }
+            withFrameMillis { t ->
+                val dt = if (last == 0L) 0f else (t - last) / 1000f
+                last = t
+                beat = state.orchestra.beatClock
+                // Critically damped: the arm follows the session like a real arm tracking a groove.
+                val target = (performance.now / total).coerceIn(0f, 1f)
+                arm += (target - arm) * (1f - exp(-dt / 0.3f))
+            }
             if (motion) spin.snapTo(((beat * 45.0) % 360.0).toFloat())
         }
     }
@@ -105,11 +124,6 @@ fun ConductScreen(state: TuttiState, performance: Performance) {
             if (motion) drop.animateTo(0f, tween(1000, easing = Motion.inOut)) else drop.snapTo(0f)
         }
     }
-    val arm by animateFloatAsState(
-        targetValue = if (performance.finished) 1f else (now / total).coerceIn(0f, 1f),
-        animationSpec = spring(dampingRatio = 1f, stiffness = Spring.StiffnessMediumLow),
-        label = "arm",
-    )
 
     val glow = remember { Animatable(0f) }
     val flash = performance.flash
@@ -138,8 +152,8 @@ fun ConductScreen(state: TuttiState, performance: Performance) {
         !performance.started -> DiscLabel(top = "SIDE A", main = "${performance.countIn.coerceAtLeast(1)}", sub = "COUNT IN", bottom = "NEEDLE DOWN")
         performance.finished -> DiscLabel(top = "SIDE A", main = "Tutti", sub = "SERVE NOW", bottom = "EVERY DISH READY")
         else -> DiscLabel(
-            top = "SERVE AT ${clockTime(((score.tutti - now) / performance.speed).toInt())}",
-            main = formatClock((score.tutti - now).toInt()),
+            top = "SERVE AT ${clockTime(((score.tutti - clock) / performance.speed).toInt())}",
+            main = formatClock(score.tutti - clock),
             sub = "TO SERVE",
             bottom = current?.let { "${score.recipes[it.dish].instrument.label.uppercase()} NEEDS YOU" } ?: "HANDS FREE",
         )
@@ -168,13 +182,13 @@ fun ConductScreen(state: TuttiState, performance: Performance) {
                 score = score,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(340.dp)
-                    .semantics { contentDescription = "Record playing. ${formatClock((score.tutti - now).toInt())} until serving." },
+                    .height(316.dp)
+                    .semantics { contentDescription = "Record playing. ${formatClock(score.tutti - clock)} until serving." },
                 label = label,
                 labelPaper = paper,
-                center = { Offset(it.width * 0.45f, it.height * 0.52f) },
+                center = { Offset(it.width * 0.45f, it.height * 0.53f) },
                 radius = { minOf(it.width * 0.39f, it.height * 0.43f) },
-                now = { if (performance.started) now else null },
+                now = { if (performance.started) performance.now else null },
                 rotation = { spin.value },
                 strobe = { ((1.0 - (beat - floor(beat))).pow(3.0)).toFloat() },
                 arm = { arm },
@@ -189,7 +203,7 @@ fun ConductScreen(state: TuttiState, performance: Performance) {
                     targetState = when {
                         !performance.started -> "countin"
                         performance.finished -> "done"
-                        current != null -> "hands:${current.dish}:${current.step}"
+                        current != null -> "hands:${current?.dish}:${current?.step}"
                         else -> "free"
                     },
                     transitionSpec = {
@@ -203,13 +217,16 @@ fun ConductScreen(state: TuttiState, performance: Performance) {
                         key == "done" -> Moment("Every dish is ready.", "The final chord is playing. Serve.")
                         key.startsWith("hands") -> {
                             val slot = score.slots.firstOrNull { "hands:${it.dish}:${it.step}" == key }
-                            if (slot != null) HandsPanel(score, slot, now) { beat } else FreePanel(performance, now)
+                            if (slot != null) HandsPanel(score, slot, clock) { beat } else FreePanel(score, clock)
                         }
-                        else -> FreePanel(performance, now)
+                        else -> FreePanel(score, clock)
                     }
                 }
-                Column(Modifier.padding(start = 24.dp, end = 20.dp, top = 20.dp, bottom = 8.dp)) {
-                    score.recipes.indices.forEach { d -> DishLine(performance, d) }
+                Column(
+                    Modifier.padding(start = 24.dp, end = 20.dp, top = 12.dp, bottom = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    score.recipes.indices.forEach { d -> DishLine(performance, d, clock) }
                 }
             }
 
@@ -225,7 +242,7 @@ fun ConductScreen(state: TuttiState, performance: Performance) {
 
         AnimatedVisibility(
             visible = shownNotice != null,
-            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 148.dp, start = 16.dp, end = 16.dp),
+            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 96.dp, start = 16.dp, end = 16.dp),
             enter = fadeIn(tween(200, easing = Motion.out)) + slideInVertically(tween(240, easing = Motion.out)) { it / 2 },
             exit = fadeOut(tween(150)) + slideOutVertically(tween(150)) { it / 3 },
         ) {
@@ -250,73 +267,106 @@ private fun Moment(headline: String, body: String) {
     }
 }
 
+/** The countdown the cook reads from the counter. It sits in its own slot so the instruction never moves. */
 @Composable
-private fun HandsPanel(score: Score, slot: Slot, now: Float, beat: () -> Double) {
+private fun Countdown(seconds: Int, description: String) {
+    val colors = tutti
+    Text(
+        formatClock(seconds),
+        style = Type.numeral.copy(color = colors.ink),
+        maxLines = 1,
+        modifier = Modifier.semantics { contentDescription = description },
+    )
+}
+
+@Composable
+private fun HandsPanel(score: Score, slot: Slot, clock: Int, beat: () -> Double) {
     val colors = tutti
     val recipe = score.recipes[slot.dish]
     val step = recipe.steps[slot.step]
-    Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Tag("Your hands", cue = true)
-            LabelMark(recipe.color, size = 16.dp, modifier = Modifier.padding(start = 12.dp))
+    val left = slot.end - clock
+    Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 4.dp)) {
+        Text(
+            step.title,
+            style = Type.headline.copy(color = colors.ink, fontSize = 34.sp, lineHeight = 38.sp),
+            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+            maxLines = 2,
+        )
+        Text(step.detail, style = Type.body.copy(color = colors.inkMuted), modifier = Modifier.padding(top = 4.dp), maxLines = 2)
+        Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            LabelMark(recipe.color, size = 16.dp)
             Text(
                 "${recipe.instrument.label}, ${recipe.name}",
                 style = Type.bodySmall.copy(color = colors.inkMuted),
-                modifier = Modifier.padding(start = 6.dp),
+                modifier = Modifier.padding(start = 8.dp),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        Text(
-            step.title,
-            style = Type.headline.copy(color = colors.ink, fontSize = 34.sp, lineHeight = 38.sp),
-            modifier = Modifier.padding(top = 12.dp).semantics { liveRegion = LiveRegionMode.Polite },
-            maxLines = 2,
-        )
-        Text(step.detail, style = Type.body.copy(color = colors.inkMuted), modifier = Modifier.padding(top = 6.dp), maxLines = 2)
-        Row(Modifier.padding(top = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(step.action.marking, style = Type.time.copy(color = colors.ink))
-            Text(step.action.hint, style = Type.bodySmall.copy(color = colors.inkMuted), modifier = Modifier.padding(start = 10.dp).weight(1f), maxLines = 1)
-            BeatPips(beat)
-            Text(
-                formatClock((slot.end - now).toInt()),
-                style = Type.time.copy(color = colors.ink),
-                modifier = Modifier.padding(start = 14.dp),
-            )
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
+            Column(Modifier.weight(1f).padding(bottom = 14.dp, end = 12.dp)) {
+                Text(step.action.marking, style = Type.time.copy(color = colors.ink))
+                Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                    BeatPips(beat)
+                    Text(
+                        step.action.hint,
+                        style = Type.bodySmall.copy(color = colors.inkMuted),
+                        modifier = Modifier.padding(start = 10.dp),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+            Countdown(left, "${formatClock(left)} left on this step")
         }
     }
 }
 
 @Composable
-private fun FreePanel(performance: Performance, now: Float) {
+private fun FreePanel(score: Score, clock: Int) {
     val colors = tutti
-    val score = performance.score
-    val next = score.cues.firstOrNull { it.start > now && score.stepOf(it).handsOn }
-    Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp)) {
-        Tag("Hands free", modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
+    val next = score.cues.firstOrNull { it.start > clock && score.stepOf(it).handsOn }
+    Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 4.dp)) {
         if (next != null) {
             val recipe = score.recipes[next.dish]
             Text(
                 "Next: ${recipe.steps[next.step].title}",
                 style = Type.headline.copy(color = colors.ink, fontSize = 34.sp, lineHeight = 38.sp),
-                modifier = Modifier.padding(top = 12.dp),
+                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                 maxLines = 2,
             )
             Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 LabelMark(recipe.color, size = 16.dp)
                 Text(
-                    "The ${recipe.instrument.label.lowercase()} comes in with its theme in ${formatClock((next.start - now).toInt())}.",
-                    style = Type.body.copy(color = colors.inkMuted),
+                    "${recipe.instrument.label}, ${recipe.name}",
+                    style = Type.bodySmall.copy(color = colors.inkMuted),
                     modifier = Modifier.padding(start = 8.dp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
+            }
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
+                Text(
+                    "Hands free. The ${recipe.instrument.label.lowercase()} comes in with its theme.",
+                    style = Type.body.copy(color = colors.inkMuted),
+                    modifier = Modifier.weight(1f).padding(bottom = 14.dp, end = 12.dp),
+                )
+                Countdown(next.start - clock, "${recipe.instrument.label} comes in in ${formatClock(next.start - clock)}")
             }
         } else {
             Text(
                 "The heat finishes it.",
                 style = Type.headline.copy(color = colors.ink, fontSize = 34.sp, lineHeight = 38.sp),
-                modifier = Modifier.padding(top = 12.dp),
+                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
             )
-            Text("Nothing left for your hands. Warm the plates.", style = Type.body.copy(color = colors.inkMuted), modifier = Modifier.padding(top = 8.dp))
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
+                Text(
+                    "Nothing left for your hands. Warm the plates.",
+                    style = Type.body.copy(color = colors.inkMuted),
+                    modifier = Modifier.weight(1f).padding(bottom = 14.dp, end = 12.dp),
+                )
+                Countdown(score.tutti - clock, "${formatClock(score.tutti - clock)} until serving")
+            }
         }
     }
 }
@@ -348,10 +398,10 @@ private fun BeatPips(beat: () -> Double) {
 
 /** A dish's state, told four ways: waiting, cooking, needs you, holding. */
 @Composable
-private fun DishLine(performance: Performance, dish: Int) {
+private fun DishLine(performance: Performance, dish: Int, clock: Int) {
     val colors = tutti
     val recipe = performance.score.recipes[dish]
-    val status = performance.dishNow(dish)
+    val status = performance.dishAt(dish, clock.toFloat())
     val step = status.slot?.let { recipe.steps[it.step] }
     val detail = when (status.phase) {
         Phase.ACTIVE, Phase.COOKING -> step?.title ?: ""
@@ -377,19 +427,14 @@ private fun DishLine(performance: Performance, dish: Int) {
     Row(
         Modifier
             .fillMaxWidth()
-            .heightIn(min = 52.dp)
+            .heightIn(min = 48.dp)
             .semantics(mergeDescendants = true) { contentDescription = description },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         LabelMark(recipe.color, size = 24.dp)
         Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
             Text(recipe.instrument.label, style = Type.button.copy(color = colors.ink))
-            Text(
-                detail,
-                style = Type.bodySmall.copy(color = colors.inkMuted),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            Text(detail, style = Type.bodySmall.copy(color = colors.inkMuted), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         Box(
             Modifier
@@ -398,7 +443,7 @@ private fun DishLine(performance: Performance, dish: Int) {
                 .border(1.dp, border, CircleShape)
                 .padding(horizontal = 12.dp, vertical = 5.dp),
         ) {
-            Text(reading, style = Type.time.copy(color = content, fontSize = 17.sp))
+            Text(reading, style = Type.button.copy(color = content, fontSize = 15.sp, fontFeatureSettings = "tnum"))
         }
     }
 }
