@@ -6,7 +6,8 @@ DIR="$(cd "$(dirname "$0")" && pwd)"
 BROWSER="${1:-/Applications/Brave Browser.app/Contents/MacOS/Brave Browser}"
 [ -x "$BROWSER" ] || BROWSER="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 mkdir -p "$DIR/slides"
-for i in $(seq 1 12); do
+COUNT=$(grep -c '<section class="slide' "$DIR/deck.html")
+for i in $(seq 1 "$COUNT"); do
   n=$(printf "%02d" "$i")
   "$BROWSER" --headless=new --disable-gpu --hide-scrollbars --force-device-scale-factor=1 \
     --window-size=1920,1080 --virtual-time-budget=4000 \
