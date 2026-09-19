@@ -13,7 +13,8 @@ $ADB shell echo device-ready
 $ADB shell am force-stop app.tutti
 $ADB shell rm -f /sdcard/tutti_demo.mp4 /sdcard/Android/data/app.tutti/files/session.wav
 $ADB logcat -c
-$ADB shell am start -n app.tutti/.MainActivity --ez record true >/dev/null
+# 35x rehearsal keeps the whole take under the two-minute limit.
+$ADB shell am start -n app.tutti/.MainActivity --ez record true --ef rehearsalSpeed 35 >/dev/null
 bash "$UI" wait "Press the record" 60
 nap 2
 
@@ -21,29 +22,35 @@ REC_START=$($ADB shell date +%s%3N)
 # Detached on the device, so an adb hiccup can't end the take early. 720p keeps the encoder light.
 $ADB shell "nohup screenrecord --size 720x1600 --bit-rate 4000000 --time-limit 180 /sdcard/tutti_demo.mp4 >/dev/null 2>&1 &"
 until $ADB shell ls /sdcard/tutti_demo.mp4 >/dev/null 2>&1; do nap 0.3; done
-nap 2.5
+nap 1.5
 $ADB shell input swipe 540 1700 540 1250 450
 nap 1.4
 tap 805 2222                  # Press the record
 nap 2.6
 $ADB shell input swipe 540 1900 540 850 600
 nap 1.2
-tap 540 764;  nap 2.0         # Cello theme
-tap 540 923;  nap 2.0         # Harp theme
-tap 540 1082; nap 2.4         # Marimba theme
+tap 540 764;  nap 1.8         # Cello theme
+tap 540 923;  nap 1.8         # Harp theme
+tap 540 1082; nap 2.2         # Marimba theme
 tap 352 2158; nap 0.8         # Rehearsal
 tap 771 2186                  # Drop the needle
+# Offsets from the needle drop: a ~2.9 s count-in, then dinner time runs at 35x.
 T0=$(date +%s)
-until [ $(( $(date +%s) - T0 )) -ge 28 ]; do nap 0.4; done
+until [ $(( $(date +%s) - T0 )) -ge 16 ]; do nap 0.4; done
 tap 795 2232                  # Done (finished rinsing early)
-until [ $(( $(date +%s) - T0 )) -ge 38 ]; do nap 0.4; done
+until [ $(( $(date +%s) - T0 )) -ge 23 ]; do nap 0.4; done
 tap 283 2232                  # +1 minute
-until [ $(( $(date +%s) - T0 )) -ge 124 ]; do nap 0.5; done
-nap 1.5
-$ADB shell input swipe 540 1900 540 600 600
+until [ $(( $(date +%s) - T0 )) -ge 71 ]; do nap 0.5; done
 nap 1.0
-bash "$UI" tap "Play the encore" || tap 540 2100
-nap 13
+$ADB shell input swipe 540 1900 540 500 500
+nap 0.6
+$ADB shell input swipe 540 1900 540 500 500
+nap 1.5
+tap 900 1882                  # Tip the band: a coffee
+nap 2.5
+tap 749 1327                  # Test Store sheet: Test valid purchase
+bash "$UI" wait "Thank you" 30
+nap 6                         # the band answers with the final chord
 $ADB shell pkill -INT screenrecord
 while $ADB shell pidof screenrecord >/dev/null 2>&1; do nap 0.5; done
 nap 2

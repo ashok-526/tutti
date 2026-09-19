@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import app.tutti.session.Screen
+import app.tutti.session.TipJar
 import app.tutti.session.TuttiState
 import app.tutti.ui.ConductScreen
 import app.tutti.ui.FinaleScreen
@@ -39,6 +40,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         state = TuttiState(applicationContext)
+        if (TipJar.configure(applicationContext)) state.tipJar.load()
+        state.rehearsalSpeed = intent.getFloatExtra("rehearsalSpeed", state.rehearsalSpeed)
         if (intent.getBooleanExtra("record", false)) {
             // Demo capture: record everything the orchestra plays from launch onwards.
             state.sessionRecording = true

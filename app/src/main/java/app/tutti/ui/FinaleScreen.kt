@@ -1,5 +1,6 @@
 package app.tutti.ui
 
+import android.app.Activity
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -21,15 +22,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import app.tutti.session.TipJar
 import app.tutti.session.TuttiState
 
 @Composable
@@ -109,9 +115,55 @@ fun FinaleScreen(state: TuttiState) {
             PrimaryButton("Play the encore", onClick = { state.playEncore() }, modifier = Modifier.weight(1f))
             SecondaryButton("New menu", onClick = { state.newProgramme() }, modifier = Modifier.weight(1f))
         }
+        TipJarSection(state.tipJar)
         Spacer(Modifier.height(8.dp))
     }
     StatusBarScrim()
+    }
+}
+
+/** An optional thank-you once dinner is served. It only appears when RevenueCat has tips to offer. */
+@Composable
+private fun TipJarSection(jar: TipJar) {
+    LaunchedEffect(Unit) { jar.load() }
+    if (jar.tips.isEmpty()) return
+    val colors = tutti
+    val activity = LocalView.current.context as Activity
+    Text(
+        "Tip the band",
+        style = Type.headline.copy(color = colors.ink),
+        modifier = Modifier.padding(horizontal = 24.dp).padding(top = 16.dp),
+    )
+    // After a tip, the thanks takes this line's place so it's seen without scrolling.
+    Text(
+        jar.note ?: "Tutti is free, and everything in it stays free. If dinner came together, you can thank the band.",
+        style = Type.body.copy(color = if (jar.note != null) colors.ink else colors.inkMuted),
+        modifier = Modifier
+            .padding(horizontal = 24.dp)
+            .padding(top = 8.dp)
+            .widthIn(max = 360.dp)
+            .semantics { liveRegion = LiveRegionMode.Polite },
+    )
+    Column(
+        Modifier
+            .padding(horizontal = 16.dp)
+            .padding(top = 20.dp)
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(colors.surface)
+            .padding(start = 20.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
+    ) {
+        jar.tips.forEach { tip ->
+            Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(tip.name, style = Type.body.copy(color = colors.ink), modifier = Modifier.weight(1f).padding(end = 12.dp))
+                SecondaryButton(
+                    tip.price,
+                    onClick = { jar.give(activity, tip) },
+                    modifier = Modifier.semantics { contentDescription = "Tip: ${tip.name}, ${tip.price}" },
+                    enabled = jar.pending == null,
+                )
+            }
+        }
     }
 }
 

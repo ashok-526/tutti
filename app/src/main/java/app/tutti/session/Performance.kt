@@ -29,6 +29,7 @@ enum class Screen { PROGRAMME, SCORE, CONDUCT, FINALE }
 
 class TuttiState(private val context: Context) {
     val orchestra = Orchestra()
+    val tipJar = TipJar(onThanks = { orchestra.tutti() })
 
     var screen by mutableStateOf(Screen.PROGRAMME)
         private set
@@ -36,6 +37,8 @@ class TuttiState(private val context: Context) {
     var score by mutableStateOf<Score?>(null)
         private set
     var rehearsal by mutableStateOf(false)
+    /** How much faster than real time a rehearsal runs. Demo captures raise it to fit a short video. */
+    var rehearsalSpeed = 20f
     /** When the whole session is being recorded (for demo videos), performances don't manage the recording. */
     var sessionRecording = false
     var performance by mutableStateOf<Performance?>(null)
@@ -63,7 +66,7 @@ class TuttiState(private val context: Context) {
         orchestra.configure(composed.recipes)
         performance = Performance(
             initial = composed,
-            speed = if (rehearsal) 20f else 1f,
+            speed = if (rehearsal) rehearsalSpeed else 1f,
             orchestra = orchestra,
             buzz = ::buzz,
             recording = if (sessionRecording) null else File(context.getExternalFilesDir(null) ?: context.cacheDir, "performance.wav"),

@@ -42,6 +42,8 @@ Timers beep; Tutti *sings*. Hearing that the harp has come in is faster, calmer 
 4. **Re-score live.** Finished early? Tap *Done*. Need more time? Tap *+1 minute*. Anything already on the heat stays fixed. Everything not yet begun is re-planned from that moment, and Tutti tells you whether the final chord holds or moves.
 5. **Finale and encore.** When the last dish is ready, the whole orchestra plays the final chord together. The encore plays your dinner back as a short piece, with each leitmotif entering in the order you cooked it.
 
+6. **Tip the band.** Tutti is free, and nothing in it is locked. After dinner is served, the Finale screen offers an optional tip through RevenueCat, and the orchestra answers every tip with the final chord.
+
 **Rehearsal mode** runs a performance at 20× speed, so you can see and hear the whole dinner in about two minutes.
 
 ## Engineering
@@ -49,6 +51,7 @@ Timers beep; Tutti *sings*. Hearing that the harp has come in is faster, calmer 
 - **Scheduler** (`schedule/Conductor.kt`): backward placement over a single hands-on resource. Tasks with the tightest windows go first (earliest-deadline-first, run in reverse), with one step of lookahead so no dish takes a slot another dish can't live without. A hill-climb then uses each dish's hold tolerance to remove any waiting, and drops the 30-second breather only if that's the last way to keep food from sitting. The same solver re-plans mid-performance, taking steps already started as fixed and "no earlier than now" as a hard floor. Unit tests cover all 31 possible menus: no overlapping hands-on tasks, every allowed gap and hold time respected, and live re-scoring stays valid.
 - **Synthesizer** (`audio/Synth.kt`): a 48-voice polyphonic synth written from scratch, rendering float PCM sample by sample. It has twelve patches: filtered-saw cello, plucked harp, marimba with an inharmonic partial, breathy flute, celesta, FM bell, a detuned pad, bass, kick, hat and shaker. Voices are stored as preallocated primitive arrays, so rendering allocates nothing. A trimmed Freeverb adds the room.
 - **Orchestra** (`audio/Orchestra.kt`): a sample-accurate 16th-note sequencer on a dedicated `URGENT_AUDIO` thread feeding `AudioTrack`. Tempo changes land on bar lines. The UI thread only publishes what each dish is doing; every musical decision is made on the audio thread. It can also record the performance to WAV.
+- **Tip jar** (`session/TipJar.kt`): RevenueCat's Android SDK. Tips are consumable products in the project's current offering, sorted by price, and bought with `purchaseWith`. The jar only appears once an offering loads, so a build without a key (or offline) shows no tip jar at all.
 - **UI** (`ui/`): Jetpack Compose with Material 3 controls, themed as a modern turntable: an aluminum plinth (smoked graphite in dark theme), black vinyl, dish colors printed only on labels and grooves, and one amber cue light. One variable typeface, Archivo, is used at three widths: condensed numerals, normal text, and expanded label caps. The record, tonearm, and label lettering are drawn on Canvas (`ui/Record.kt`) and driven by the audio engine's beat clock. It follows the system dark theme, honors Remove animations, and supports TalkBack.
 
 ```
@@ -71,6 +74,14 @@ Requirements: JDK 17 and the Android SDK (compileSdk 35).
 ```
 
 Or open the folder in Android Studio and run the `app` configuration. Tutti works on Android 8.0+ (API 26). Put your phone somewhere you can hear it, or use a Bluetooth speaker in the kitchen.
+
+**Tip jar (optional).** Add your RevenueCat public SDK key to `local.properties` (it's gitignored):
+
+```properties
+revenuecat.apiKey=test_xxxxxxxxxxxxxxxx
+```
+
+In the RevenueCat dashboard, add consumable products to the project's Test Store and put them in the current offering. Each package shows up as one tip, using the product's name and price. Test Store keys (`test_…`) only run in debuggable builds; release builds skip them, because the SDK stops a release build that uses one. For recording demos with a Test Store key, `./gradlew :app:installDemo` installs a release-speed build that stays debuggable.
 
 ## Credits
 

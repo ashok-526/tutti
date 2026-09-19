@@ -4,7 +4,7 @@ Slide copy for the Adobe Express template, plus a demo video script.
 
 - **Finished slides:** `docs/deck/slides/01.png` to `12.png` (1920×1080). Import them into Adobe Express as full-bleed images, or rebuild the copy on the template. To regenerate after editing `docs/deck/deck.html`, run `bash docs/deck/render.sh`.
 - **Screenshots:** `docs/screenshots/` (full-resolution phone captures, plus `hero.png` with four screens side by side)
-- **Demo video:** `docs/demo/tutti-demo.mp4` (screen plus the app's own audio, rehearsal mode at 20×)
+- **Demo video:** `docs/demo/tutti-demo.mp4` (screen plus the app's own audio, rehearsal mode at 35×, 1:42)
 
 ---
 
@@ -51,16 +51,17 @@ Say "done" out loud. Press any recipe from a link. Smart ovens that report their
 
 ---
 
-## Demo video script (about 2.5 minutes)
+## Demo video script (about 1:40)
 
 | Time | Shot | Voice-over / caption |
 |---|---|---|
 | 0:00 | Tonight's record: scroll the crate | "Three dishes, three timers, one pair of hands. Tutti presses dinner onto one record." |
-| 0:08 | Tap Press the record | "Each dish becomes a groove with its own instrument." |
-| 0:12 | The record screen: tap Cello, Harp, Marimba | "Every dish has a four-note theme. That's how you'll know it needs you." |
-| 0:20 | Rehearsal on, Drop the needle, count-in | "Drop the needle." |
-| 0:25 | Hands free: next cue and the tonearm moving | "While the heat works, you hear it working." |
-| 0:35 | Your hands: amber light, beat pips | "When a dish needs you, its theme builds and the amber light comes on. Chop on the beat." |
-| 0:45 | Tap Done, then +1 minute: the snackbar | "Finished early or running late? The record re-presses itself." |
-| 2:15 | The needle reaches the label | "When the needle reaches the label, everything is ready." |
-| 2:20 | Finale, Play the encore | "Flip it over, and dinner plays back as a song. Tutti." |
+| 0:04 | Tap Press the record | "Each dish becomes a groove with its own instrument." |
+| 0:06 | The record screen: tap Cello, Harp, Marimba | "Every dish has a four-note theme. That's how you'll know it needs you." |
+| 0:15 | Rehearsal on, Drop the needle, count-in | "Drop the needle." |
+| 0:20 | Hands free: next cue and the tonearm moving | "While the heat works, you hear it working." |
+| 0:38 | +1 minute: the snackbar | "Running late? The record re-presses itself." |
+| 0:40 | Your hands: amber light, beat pips | "When a dish needs you, its theme builds and the amber light comes on. Chop on the beat." |
+| 1:25 | The needle reaches the label | "When the needle reaches the label, everything is ready." |
+| 1:30 | Finale, Tip the band, Test Store sheet | "Tutti is free, and nothing is locked. If dinner came together, you can tip the band." |
+| 1:35 | Thank you, final chord | "And the band plays one for you. Tutti." |
